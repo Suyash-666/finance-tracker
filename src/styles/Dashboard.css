@@ -229,3 +229,51 @@
     height: 32px;
   }
 }
+/* Budget & Investment Tips Section */
+.budget-section {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  max-width: 500px;
+}
+
+.budget-section h3 {
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+  color: #4f46e5;
+}
+
+.budget-section input[type="number"] {
+  width: 60%;
+  padding: 8px 12px;
+  margin-right: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.budget-section button {
+  padding: 8px 16px;
+  background-color: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.budget-section button:hover {
+  background-color: #3730a3;
+}
+
+.budget-section p {
+  margin-top: 10px;
+  font-size: 1rem;
+}
+
+.budget-section p:first-of-type {
+  font-weight: bold;
+}
