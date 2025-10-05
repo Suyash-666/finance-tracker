@@ -1,7 +1,7 @@
 // src/components/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
@@ -13,6 +13,11 @@ const Dashboard = ({ user }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [expenses, setExpenses] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
+
+  // NEW: Budget and alerts
+  const [budget, setBudget] = useState(0);
+  const [budgetAlert, setBudgetAlert] = useState('');
+  const [tip, setTip] = useState('');
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -33,8 +38,40 @@ const Dashboard = ({ user }) => {
       setExpenses(expensesData);
     });
 
+    // Load saved budget from Firestore
+    const loadBudget = async () => {
+      const budgetRef = doc(db, 'budgets', auth.currentUser.uid);
+      const budgetSnap = await getDoc(budgetRef);
+      if (budgetSnap.exists()) setBudget(budgetSnap.data().amount);
+    };
+    loadBudget();
+
     return () => unsubscribe();
   }, [refreshTrigger]);
+
+  // Calculate total expenses
+  const totalSpent = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+
+  // Update alerts and tips whenever spending or budget changes
+  useEffect(() => {
+    if (budget === 0) return;
+
+    if (totalSpent >= budget) setBudgetAlert('Budget Exceeded!');
+    else if (totalSpent >= 0.8 * budget) setBudgetAlert('Approaching Budget Limit');
+    else setBudgetAlert('');
+
+    const savingsRatio = (budget - totalSpent) / budget;
+    if (savingsRatio > 0.2) setTip('Great! You can invest your savings in low-risk funds.');
+    else if (savingsRatio > 0.1) setTip('Good job! Consider a recurring deposit.');
+    else setTip('Try to cut expenses to save more this month.');
+  }, [totalSpent, budget]);
+
+  // Save budget to Firestore
+  const handleBudgetSave = async () => {
+    if (!budget) return;
+    await setDoc(doc(db, 'budgets', auth.currentUser.uid), { amount: parseFloat(budget) });
+    alert('Budget saved!');
+  };
 
   const handleSignOut = async () => {
     try {
@@ -68,21 +105,21 @@ const Dashboard = ({ user }) => {
             <h1>FinanceTracker</h1>
           </div>
         </div>
-        
+
         <nav className="dashboard-nav">
-          <button 
+          <button
             className={`nav-btn ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
             <FaChartPie /> Overview
           </button>
-          <button 
+          <button
             className={`nav-btn ${activeTab === 'add' ? 'active' : ''}`}
             onClick={() => setActiveTab('add')}
           >
             <FaPlus /> Add Expense
           </button>
-          <button 
+          <button
             className={`nav-btn ${activeTab === 'list' ? 'active' : ''}`}
             onClick={() => setActiveTab('list')}
           >
@@ -109,6 +146,23 @@ const Dashboard = ({ user }) => {
           <div className="overview-tab">
             <div className="charts-section">
               <ExpenseCharts expenses={expenses} />
+            </div>
+
+            {/* NEW: Budget & Investment Tips */}
+            <div className="budget-section">
+              <h3>Set Monthly Budget</h3>
+              <input
+                type="number"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                placeholder="Enter budget amount"
+              />
+              <button onClick={handleBudgetSave}>Save Budget</button>
+
+              {budgetAlert && <p style={{ color: 'red' }}>{budgetAlert}</p>}
+              {tip && <p style={{ color: 'green' }}>{tip}</p>}
+
+              <p>Total Spent: {totalSpent} / Budget: {budget}</p>
             </div>
           </div>
         )}
