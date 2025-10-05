@@ -1,5 +1,5 @@
 // src/components/Dashboard.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
@@ -14,10 +14,13 @@ const Dashboard = ({ user }) => {
   const [expenses, setExpenses] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // NEW: Budget and alerts
-  const [budget, setBudget] = useState(0);
-  const [budgetAlert, setBudgetAlert] = useState('');
-  const [tip, setTip] = useState('');
+  // Budget state with loading indicator
+  const [budget, setBudget] = useState(null);
+  const [income, setIncome] = useState(null);
+  const [budgetInput, setBudgetInput] = useState('');
+  const [incomeInput, setIncomeInput] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -38,39 +41,177 @@ const Dashboard = ({ user }) => {
       setExpenses(expensesData);
     });
 
-    // Load saved budget from Firestore
-    const loadBudget = async () => {
-      const budgetRef = doc(db, 'budgets', auth.currentUser.uid);
-      const budgetSnap = await getDoc(budgetRef);
-      if (budgetSnap.exists()) setBudget(budgetSnap.data().amount);
+    // Load saved budget and income from Firestore
+    const loadBudgetData = async () => {
+      try {
+        const budgetRef = doc(db, 'budgets', auth.currentUser.uid);
+        const budgetSnap = await getDoc(budgetRef);
+        
+        if (budgetSnap.exists()) {
+          const data = budgetSnap.data();
+          const budgetAmount = data.amount || 0;
+          const incomeAmount = data.income || 0;
+          
+          setBudget(budgetAmount);
+          setIncome(incomeAmount);
+          setBudgetInput(budgetAmount.toString());
+          setIncomeInput(incomeAmount.toString());
+        } else {
+          setBudget(0);
+          setIncome(0);
+        }
+      } catch (error) {
+        console.error('Error loading budget:', error);
+        setBudget(0);
+        setIncome(0);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    loadBudget();
+    
+    loadBudgetData();
 
     return () => unsubscribe();
   }, [refreshTrigger]);
 
-  // Calculate total expenses
-  const totalSpent = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+  // Memoized total spending calculation
+  const totalSpent = useMemo(() => {
+    return expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+  }, [expenses]);
 
-  // Update alerts and tips whenever spending or budget changes
-  useEffect(() => {
-    if (budget === 0) return;
+  // Calculate budget metrics
+  const budgetMetrics = useMemo(() => {
+    if (budget === null || budget === 0) {
+      return { percent: 0, remaining: 0, savings: 0, savingsPercent: 0 };
+    }
 
-    if (totalSpent >= budget) setBudgetAlert('Budget Exceeded!');
-    else if (totalSpent >= 0.8 * budget) setBudgetAlert('Approaching Budget Limit');
-    else setBudgetAlert('');
+    const percent = (totalSpent / budget) * 100;
+    const remaining = budget - totalSpent;
+    const savings = income > 0 ? income - totalSpent : remaining;
+    const savingsPercent = income > 0 ? (savings / income) * 100 : 0;
 
-    const savingsRatio = (budget - totalSpent) / budget;
-    if (savingsRatio > 0.2) setTip('Great! You can invest your savings in low-risk funds.');
-    else if (savingsRatio > 0.1) setTip('Good job! Consider a recurring deposit.');
-    else setTip('Try to cut expenses to save more this month.');
-  }, [totalSpent, budget]);
+    return { percent, remaining, savings, savingsPercent };
+  }, [totalSpent, budget, income]);
 
-  // Save budget to Firestore
+  // Budget alert with proper levels
+  const budgetAlert = useMemo(() => {
+    if (budget === null || budget === 0) return null;
+
+    const { percent } = budgetMetrics;
+
+    if (percent >= 100) {
+      return {
+        level: 'critical',
+        message: `Budget exceeded by $${Math.abs(budgetMetrics.remaining).toFixed(2)}!`,
+        className: 'alert-critical'
+      };
+    } else if (percent >= 80) {
+      return {
+        level: 'warning',
+        message: `Warning: ${percent.toFixed(1)}% of budget used ($${budgetMetrics.remaining.toFixed(2)} remaining)`,
+        className: 'alert-warning'
+      };
+    } else if (percent >= 50) {
+      return {
+        level: 'info',
+        message: `${percent.toFixed(1)}% of budget used ($${budgetMetrics.remaining.toFixed(2)} remaining)`,
+        className: 'alert-info'
+      };
+    } else {
+      return {
+        level: 'good',
+        message: `On track: ${percent.toFixed(1)}% used, $${budgetMetrics.remaining.toFixed(2)} remaining`,
+        className: 'alert-good'
+      };
+    }
+  }, [budget, budgetMetrics]);
+
+  // Investment tips with better logic
+  const investmentTip = useMemo(() => {
+    if (income === null || income === 0) {
+      return {
+        title: 'Set Your Income',
+        message: 'Add your monthly income to get personalized investment tips.',
+        type: 'info'
+      };
+    }
+
+    const { savings, savingsPercent } = budgetMetrics;
+
+    if (savings <= 0) {
+      return {
+        title: 'Focus on Reducing Expenses',
+        message: 'Your expenses meet or exceed your income. Review your spending and identify areas to cut back.',
+        type: 'warning'
+      };
+    }
+
+    if (savingsPercent >= 30) {
+      return {
+        title: 'Excellent Savings Rate!',
+        message: `You're saving ${savingsPercent.toFixed(1)}% ($${savings.toFixed(2)}). Consider diversifying into index funds, ETFs, or a retirement account for long-term growth.`,
+        type: 'excellent'
+      };
+    } else if (savingsPercent >= 20) {
+      return {
+        title: 'Great Savings Habit',
+        message: `You're saving ${savingsPercent.toFixed(1)}% ($${savings.toFixed(2)}). Consider opening a high-yield savings account or exploring low-risk mutual funds.`,
+        type: 'good'
+      };
+    } else if (savingsPercent >= 10) {
+      return {
+        title: 'Building Your Savings',
+        message: `You're saving ${savingsPercent.toFixed(1)}% ($${savings.toFixed(2)}). Try to increase this to 20% by reducing discretionary spending. Consider starting an emergency fund.`,
+        type: 'moderate'
+      };
+    } else {
+      return {
+        title: 'Increase Your Savings',
+        message: `You're saving only ${savingsPercent.toFixed(1)}% ($${savings.toFixed(2)}). Aim for at least 20% savings. Review your expenses and create a budget to save more.`,
+        type: 'alert'
+      };
+    }
+  }, [income, budgetMetrics]);
+
+  // Save budget with validation and error handling
   const handleBudgetSave = async () => {
-    if (!budget) return;
-    await setDoc(doc(db, 'budgets', auth.currentUser.uid), { amount: parseFloat(budget) });
-    alert('Budget saved!');
+    setSaveError('');
+    
+    const budgetValue = parseFloat(budgetInput);
+    const incomeValue = parseFloat(incomeInput);
+
+    // Validation
+    if (isNaN(budgetValue) || budgetValue < 0) {
+      setSaveError('Please enter a valid budget amount');
+      return;
+    }
+
+    if (isNaN(incomeValue) || incomeValue < 0) {
+      setSaveError('Please enter a valid income amount');
+      return;
+    }
+
+    if (budgetValue > incomeValue && incomeValue > 0) {
+      const confirm = window.confirm(
+        'Your budget exceeds your income. Are you sure you want to continue?'
+      );
+      if (!confirm) return;
+    }
+
+    try {
+      await setDoc(doc(db, 'budgets', auth.currentUser.uid), {
+        amount: budgetValue,
+        income: incomeValue,
+        updatedAt: new Date().toISOString()
+      });
+      
+      setBudget(budgetValue);
+      setIncome(incomeValue);
+      alert('Budget and income saved successfully!');
+    } catch (error) {
+      console.error('Error saving budget:', error);
+      setSaveError('Failed to save budget. Please try again.');
+    }
   };
 
   const handleSignOut = async () => {
@@ -144,25 +285,93 @@ const Dashboard = ({ user }) => {
       <main className="dashboard-main">
         {activeTab === 'overview' && (
           <div className="overview-tab">
-            <div className="charts-section">
-              <ExpenseCharts expenses={expenses} />
+            {/* Budget Alert */}
+            {budgetAlert && (
+              <div className={`budget-alert ${budgetAlert.className}`}>
+                <strong>{budgetAlert.level.toUpperCase()}:</strong> {budgetAlert.message}
+              </div>
+            )}
+
+            {/* Budget Configuration */}
+            <div className="budget-section">
+              <h3>Budget & Income Settings</h3>
+              
+              <div className="budget-inputs">
+                <div className="input-group">
+                  <label htmlFor="income">Monthly Income ($)</label>
+                  <input
+                    id="income"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={incomeInput}
+                    onChange={(e) => setIncomeInput(e.target.value)}
+                    placeholder="Enter monthly income"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label htmlFor="budget">Monthly Budget ($)</label>
+                  <input
+                    id="budget"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={budgetInput}
+                    onChange={(e) => setBudgetInput(e.target.value)}
+                    placeholder="Enter budget limit"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <button 
+                onClick={handleBudgetSave} 
+                className="save-budget-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Loading...' : 'Save Budget & Income'}
+              </button>
+
+              {saveError && <p className="error-message">{saveError}</p>}
+
+              {/* Budget Summary */}
+              {budget !== null && budget > 0 && (
+                <div className="budget-summary">
+                  <div className="summary-item">
+                    <span className="label">Total Spent:</span>
+                    <span className="value">${totalSpent.toFixed(2)}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span className="label">Budget:</span>
+                    <span className="value">${budget.toFixed(2)}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span className="label">Remaining:</span>
+                    <span className={`value ${budgetMetrics.remaining < 0 ? 'negative' : 'positive'}`}>
+                      ${budgetMetrics.remaining.toFixed(2)}
+                    </span>
+                  </div>
+                  {income > 0 && (
+                    <div className="summary-item">
+                      <span className="label">Savings:</span>
+                      <span className="value">${budgetMetrics.savings.toFixed(2)} ({budgetMetrics.savingsPercent.toFixed(1)}%)</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* NEW: Budget & Investment Tips */}
-            <div className="budget-section">
-              <h3>Set Monthly Budget</h3>
-              <input
-                type="number"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                placeholder="Enter budget amount"
-              />
-              <button onClick={handleBudgetSave}>Save Budget</button>
+            {/* Investment Tips */}
+            <div className={`investment-tips ${investmentTip.type}`}>
+              <h4>{investmentTip.title}</h4>
+              <p>{investmentTip.message}</p>
+            </div>
 
-              {budgetAlert && <p style={{ color: 'red' }}>{budgetAlert}</p>}
-              {tip && <p style={{ color: 'green' }}>{tip}</p>}
-
-              <p>Total Spent: {totalSpent} / Budget: {budget}</p>
+            {/* Charts */}
+            <div className="charts-section">
+              <ExpenseCharts expenses={expenses} />
             </div>
           </div>
         )}
