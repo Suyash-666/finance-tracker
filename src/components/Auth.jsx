@@ -1,8 +1,15 @@
 // src/components/Auth.jsx
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../services/firebase';
-import { FaGoogle, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaChartLine } from 'react-icons/fa';
+import {
+  auth,
+  googleProvider,
+  createMfaResolverFromError,
+  sendMfaSignInSms,
+  resolveMfaSignInWithSms,
+  resolveMfaSignInWithTotp
+} from '../services/firebase';
+import { FaGoogle, FaEye, FaEyeSlash, FaChartLine } from 'react-icons/fa';
 import '../styles/Auth.css';
 
 const Auth = () => {
@@ -12,6 +19,29 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  // MFA state
+  const [mfaResolver, setMfaResolver] = useState(null);
+  const [mfaStep, setMfaStep] = useState('none'); // none | select-factor | totp | sms-send | sms-verify
+  const [mfaFactors, setMfaFactors] = useState([]);
+  const [selectedFactor, setSelectedFactor] = useState(null);
+  const [totpCode, setTotpCode] = useState('');
+  const [smsCode, setSmsCode] = useState('');
+  const [smsVerificationId, setSmsVerificationId] = useState('');
+  const [mfaError, setMfaError] = useState('');
+  const [mfaBusy, setMfaBusy] = useState(false);
+
+  const resetMfaState = () => {
+    setMfaResolver(null);
+    setMfaStep('none');
+    setMfaFactors([]);
+    setSelectedFactor(null);
+    setTotpCode('');
+    setSmsCode('');
+    setSmsVerificationId('');
+    setMfaError('');
+    setMfaBusy(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +55,14 @@ const Auth = () => {
         await createUserWithEmailAndPassword(auth, email, password);
       }
     } catch (error) {
-      setError(error.message);
+      if (error?.code === 'auth/multi-factor-auth-required') {
+        const resolver = createMfaResolverFromError(error);
+        setMfaResolver(resolver);
+        setMfaFactors(resolver.hints || []);
+        setMfaStep('select-factor');
+      } else {
+        setError(error.message);
+      }
     }
 
     setLoading(false);
@@ -38,7 +75,14 @@ const Auth = () => {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      setError(error.message);
+      if (error?.code === 'auth/multi-factor-auth-required') {
+        const resolver = createMfaResolverFromError(error);
+        setMfaResolver(resolver);
+        setMfaFactors(resolver.hints || []);
+        setMfaStep('select-factor');
+      } else {
+        setError(error.message);
+      }
     }
 
     setLoading(false);
@@ -76,6 +120,161 @@ const Auth = () => {
             </div>
           )}
 
+          {/* MFA Flow */}
+          {mfaStep !== 'none' && (
+            <div className="mfa-panel" style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0 }}>Two‑Factor Authentication</h3>
+                <button type="button" onClick={resetMfaState} disabled={mfaBusy} className="switch-button">Cancel</button>
+              </div>
+
+              {mfaError && (
+                <div className="error-message" style={{ marginTop: 8 }}>
+                  <span className="error-icon">⚠️</span>
+                  {mfaError}
+                </div>
+              )}
+
+              {mfaStep === 'select-factor' && (
+                <div style={{ marginTop: 12 }}>
+                  <p>Select a verification method:</p>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {mfaFactors.map((hint) => (
+                      <li key={hint.uid} style={{ marginBottom: 8 }}>
+                        <button
+                          type="button"
+                          className="auth-button"
+                          style={{ width: '100%' }}
+                          onClick={() => {
+                            setSelectedFactor(hint);
+                            if (hint.factorId === 'totp') {
+                              setMfaStep('totp');
+                            } else if (hint.factorId === 'phone') {
+                              setMfaStep('sms-send');
+                            } else {
+                              setMfaError('Unsupported factor type');
+                            }
+                          }}
+                        >
+                          {hint.factorId === 'totp' ? 'Use Authenticator App' : `Text message to ${hint.phoneNumber || 'your phone'}`}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {mfaStep === 'totp' && (
+                <div style={{ marginTop: 12 }}>
+                  <label>Enter 6‑digit code from your Authenticator app</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={totpCode}
+                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="123456"
+                    maxLength={8}
+                    disabled={mfaBusy}
+                    style={{ width: '100%', marginTop: 8 }}
+                  />
+                  <button
+                    type="button"
+                    className="auth-button"
+                    onClick={async () => {
+                      if (!mfaResolver || !selectedFactor) return;
+                      setMfaBusy(true);
+                      setMfaError('');
+                      try {
+                        await resolveMfaSignInWithTotp(mfaResolver, selectedFactor.uid, totpCode.trim());
+                        resetMfaState();
+                      } catch (e) {
+                        setMfaError(e.message || 'Invalid code');
+                      } finally {
+                        setMfaBusy(false);
+                      }
+                    }}
+                    disabled={mfaBusy || totpCode.trim().length < 6}
+                    style={{ marginTop: 12 }}
+                  >
+                    {mfaBusy ? 'Verifying…' : 'Verify and Sign In'}
+                  </button>
+                </div>
+              )}
+
+              {mfaStep === 'sms-send' && (
+                <div style={{ marginTop: 12 }}>
+                  <p>We will send a code to {selectedFactor?.phoneNumber || 'your phone number'}.</p>
+                  {/* Invisible reCAPTCHA for MFA sign-in via SMS */}
+                  <div id="recaptcha-container-auth" style={{ height: 0 }}></div>
+                  <button
+                    type="button"
+                    className="auth-button"
+                    onClick={async () => {
+                      if (!mfaResolver || !selectedFactor) return;
+                      setMfaBusy(true);
+                      setMfaError('');
+                      try {
+                        const { verificationId } = await sendMfaSignInSms(
+                          mfaResolver,
+                          selectedFactor,
+                          'recaptcha-container-auth'
+                        );
+                        setSmsVerificationId(verificationId);
+                        setMfaStep('sms-verify');
+                      } catch (e) {
+                        setMfaError(e.message || 'Failed to send code');
+                      } finally {
+                        setMfaBusy(false);
+                      }
+                    }}
+                    disabled={mfaBusy}
+                  >
+                    {mfaBusy ? 'Sending…' : 'Send Code'}
+                  </button>
+                </div>
+              )}
+
+              {mfaStep === 'sms-verify' && (
+                <div style={{ marginTop: 12 }}>
+                  <label>Enter the 6‑digit SMS code</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={smsCode}
+                    onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="123456"
+                    maxLength={8}
+                    disabled={mfaBusy}
+                    style={{ width: '100%', marginTop: 8 }}
+                  />
+                  <button
+                    type="button"
+                    className="auth-button"
+                    onClick={async () => {
+                      if (!mfaResolver || !smsVerificationId) return;
+                      setMfaBusy(true);
+                      setMfaError('');
+                      try {
+                        await resolveMfaSignInWithSms(mfaResolver, smsVerificationId, smsCode.trim());
+                        resetMfaState();
+                      } catch (e) {
+                        setMfaError(e.message || 'Invalid code');
+                      } finally {
+                        setMfaBusy(false);
+                      }
+                    }}
+                    disabled={mfaBusy || smsCode.trim().length < 6}
+                    style={{ marginTop: 12 }}
+                  >
+                    {mfaBusy ? 'Verifying…' : 'Verify and Sign In'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <button 
             onClick={handleGoogleSignIn}
             disabled={loading}
@@ -92,7 +291,7 @@ const Auth = () => {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <div className="input-wrapper">
-                <FaEnvelope className="input-icon" />
+             
                 <input
                   type="email"
                   value={email}
@@ -106,7 +305,7 @@ const Auth = () => {
             
             <div className="form-group">
               <div className="input-wrapper">
-                <FaLock className="input-icon" />
+               
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}

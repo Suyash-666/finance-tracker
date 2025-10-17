@@ -214,31 +214,51 @@
   display: flex;
   flex-direction: column;
 }
-
+/* ...existing code... */
 .input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
+/* ensure icon has explicit size and won't overlap text */
 .input-icon {
   position: absolute;
-  left: 1rem;
+  left: 16px;                 /* distance from input left edge */
+  top: 50%;
+  transform: translateY(-50%);
   color: #6b7280;
-  z-index: 1;
+  z-index: 2;
+  pointer-events: none;
+  font-size: 18px;           /* explicit icon size */
+  line-height: 1;
+  display: flex;             /* changed from block to flex for better centering */
+  align-items: center;
+  justify-content: center;
 }
 
+/* react-icons render as svg — force size for reliability */
+.input-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* ensure padding leaves room for the icon and box-sizing includes padding */
 .input-wrapper input {
   width: 100%;
-  padding: 1rem 1rem 1rem 2.75rem;
+  box-sizing: border-box;    /* include padding in width calculations */
+  padding: 1rem 3rem 1rem 50px; /* increased left padding to 50px to avoid overlap */
   border: 2px solid #e5e7eb;
   border-radius: 10px;
   font-size: 1rem;
   background: #fff;
   transition: all 0.2s ease;
   outline: none;
+  position: relative;
+  z-index: 1;
 }
-
+/* ...existing code... */
 .input-wrapper input:focus {
   border-color: #4f46e5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
@@ -258,12 +278,13 @@
   padding: 0.25rem;
   border-radius: 4px;
   transition: color 0.2s ease;
+  z-index: 3; /* ensure toggle is above the input */
 }
 
 .password-toggle:hover {
   color: #4f46e5;
 }
-
+/* ...existing code... */
 .auth-button {
   width: 100%;
   padding: 1rem;
