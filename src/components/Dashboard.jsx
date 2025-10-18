@@ -1,5 +1,5 @@
 // src/components/Dashboard.jsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { signOut, sendEmailVerification } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db, getEnrolledFactors, startSmsEnrollment, finalizeSmsEnrollment, unenrollMfaFactor } from '../services/firebase';
@@ -31,6 +31,19 @@ const Dashboard = ({ user }) => {
   const [mfaBusy, setMfaBusy] = useState(false);
   const [mfaError, setMfaError] = useState('');
   const [emailVerified, setEmailVerified] = useState(!!user?.emailVerified);
+  const enrollRecaptchaClearRef = useRef(null);
+
+  const isValidE164 = (num) => /^\+[1-9]\d{7,14}$/.test(String(num || '').trim());
+
+  // Clear reCAPTCHA when leaving SMS mode or on unmount
+  useEffect(() => {
+    return () => {
+      if (enrollRecaptchaClearRef.current) {
+        enrollRecaptchaClearRef.current();
+        enrollRecaptchaClearRef.current = null;
+      }
+    };
+  }, [enrollMode]);
 
   useEffect(() => {
     setEmailVerified(!!user?.emailVerified);
@@ -375,23 +388,40 @@ const Dashboard = ({ user }) => {
                 {!smsVerificationId ? (
                   <button
                     className="save-budget-btn"
-                    disabled={mfaBusy || !phoneNumber}
+                    disabled={mfaBusy || !isValidE164(phoneNumber)}
                     onClick={async () => {
                       if (!auth.currentUser) return;
+                      if (!isValidE164(phoneNumber)) {
+                        setMfaError('Enter a valid phone number in E.164 format, e.g., +15551234567');
+                        return;
+                      }
                       setMfaBusy(true);
                       setMfaError('');
                       try {
-                        const { verificationId } = await startSmsEnrollment(
+                        // clear any prior reCAPTCHA instance in this container
+                        if (enrollRecaptchaClearRef.current) {
+                          enrollRecaptchaClearRef.current();
+                          enrollRecaptchaClearRef.current = null;
+                        }
+                        const { verificationId, clearRecaptcha } = await startSmsEnrollment(
                           auth.currentUser,
                           phoneNumber,
                           'recaptcha-container-enroll'
                         );
+                        enrollRecaptchaClearRef.current = clearRecaptcha;
                         setSmsVerificationId(verificationId);
                       } catch (e) {
                         if (e?.code === 'auth/unverified-email') {
                           setMfaError('Email not verified. Please verify your email and try again.');
+                        } else if (e?.code === 'auth/requires-recent-login') {
+                          setMfaError('This action requires recent login. Please sign out and sign in again, then retry.');
                         } else {
                           setMfaError(e.message || 'Failed to send SMS');
+                        }
+                        // ensure reCAPTCHA is cleared so it can be re-rendered
+                        if (enrollRecaptchaClearRef.current) {
+                          enrollRecaptchaClearRef.current();
+                          enrollRecaptchaClearRef.current = null;
                         }
                       } finally {
                         setMfaBusy(false);
@@ -433,11 +463,17 @@ const Dashboard = ({ user }) => {
                         } catch (e) {
                           if (e?.code === 'auth/unverified-email') {
                             setMfaError('Email not verified. Please verify your email and try again.');
+                          } else if (e?.code === 'auth/requires-recent-login') {
+                            setMfaError('This action requires recent login. Please sign out and sign in again, then retry.');
                           } else {
                             setMfaError(e.message || 'Failed to verify SMS code');
                           }
                         } finally {
                           setMfaBusy(false);
+                          if (enrollRecaptchaClearRef.current) {
+                            enrollRecaptchaClearRef.current();
+                            enrollRecaptchaClearRef.current = null;
+                          }
                         }
                       }}
                       style={{ marginTop: 8 }}
