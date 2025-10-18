@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { signOut, sendEmailVerification } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db, getEnrolledFactors, startTotpEnrollment, finalizeTotpEnrollment, startSmsEnrollment, finalizeSmsEnrollment, unenrollMfaFactor } from '../services/firebase';
+import { auth, db, getEnrolledFactors, startSmsEnrollment, finalizeSmsEnrollment, unenrollMfaFactor } from '../services/firebase';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
@@ -24,10 +24,7 @@ const Dashboard = ({ user }) => {
 
   // MFA enrollment state
   const [showEnroll, setShowEnroll] = useState(false);
-  const [enrollMode, setEnrollMode] = useState(null); // 'totp' | 'sms'
-  const [qrUrl, setQrUrl] = useState('');
-  const [totpSecretObj, setTotpSecretObj] = useState(null);
-  const [totpCode, setTotpCode] = useState('');
+  const [enrollMode, setEnrollMode] = useState(null); // only 'sms' now
   const [phoneNumber, setPhoneNumber] = useState('');
   const [smsVerificationId, setSmsVerificationId] = useState('');
   const [smsCode, setSmsCode] = useState('');
@@ -360,89 +357,8 @@ const Dashboard = ({ user }) => {
               <p className="error-message">{mfaError}</p>
             )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button className="save-budget-btn" onClick={() => { setEnrollMode('totp'); setMfaError(''); }} disabled={mfaBusy || !emailVerified}>Set up Authenticator app</button>
               <button className="save-budget-btn" onClick={() => { setEnrollMode('sms'); setMfaError(''); }} disabled={mfaBusy || !emailVerified}>Set up SMS</button>
             </div>
-
-            {/* TOTP Enrollment */}
-            {enrollMode === 'totp' && (
-              <div style={{ marginTop: 12 }}>
-                {!qrUrl ? (
-                  <button
-                    className="save-budget-btn"
-                    disabled={mfaBusy}
-                    onClick={async () => {
-                      if (!auth.currentUser) return;
-                      setMfaBusy(true);
-                      setMfaError('');
-                      try {
-                        const { totpSecret, qrCodeUrl } = await startTotpEnrollment(auth.currentUser, { issuer: 'FinanceTracker' });
-                        setTotpSecretObj(totpSecret);
-                        setQrUrl(qrCodeUrl);
-                      } catch (e) {
-                        if (e?.code === 'auth/unverified-email') {
-                          setMfaError('Email not verified. Please verify your email and try again.');
-                        } else {
-                          setMfaError(e.message || 'Failed to start TOTP enrollment');
-                        }
-                      } finally {
-                        setMfaBusy(false);
-                      }
-                    }}
-                  >
-                    {mfaBusy ? 'Preparing…' : 'Generate QR Code'}
-                  </button>
-                ) : (
-                  <div>
-                    <p>Open your Authenticator app and add a new account using this URL:</p>
-                    <textarea readOnly value={qrUrl} style={{ width: '100%', height: 80 }} />
-                    <button className="save-budget-btn" onClick={() => navigator.clipboard?.writeText(qrUrl)} style={{ marginTop: 6 }}>Copy URL</button>
-                    <div style={{ marginTop: 8 }}>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        value={totpCode}
-                        onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
-                        placeholder="123456"
-                        maxLength={8}
-                        style={{ width: 160 }}
-                      />
-                      <button
-                        className="save-budget-btn"
-                        disabled={mfaBusy || totpCode.trim().length < 6}
-                        onClick={async () => {
-                          if (!auth.currentUser || !totpSecretObj) return;
-                          setMfaBusy(true);
-                          setMfaError('');
-                          try {
-                            await finalizeTotpEnrollment(auth.currentUser, totpSecretObj, totpCode.trim(), 'Authenticator');
-                            const updated = getEnrolledFactors(auth.currentUser);
-                            setShowEnroll(updated.length === 0);
-                            setEnrollMode(null);
-                            setQrUrl('');
-                            setTotpSecretObj(null);
-                            setTotpCode('');
-                            alert('Authenticator app enrolled successfully.');
-                          } catch (e) {
-                            if (e?.code === 'auth/unverified-email') {
-                              setMfaError('Email not verified. Please verify your email and try again.');
-                            } else {
-                              setMfaError(e.message || 'Failed to verify code');
-                            }
-                          } finally {
-                            setMfaBusy(false);
-                          }
-                        }}
-                        style={{ marginLeft: 8 }}
-                      >
-                        {mfaBusy ? 'Verifying…' : 'Verify'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* SMS Enrollment */}
             {enrollMode === 'sms' && (
