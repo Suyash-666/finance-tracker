@@ -5,7 +5,8 @@ import {
   auth,
   googleProvider,
   createMfaResolverFromError,
-  resolveMfaSignInWithTotp
+  sendMfaSignInSms,
+  resolveMfaSignInWithSms
 } from '../services/firebase';
 import { FaGoogle, FaEye, FaEyeSlash, FaChartLine } from 'react-icons/fa';
 import '../styles/Auth.css';
@@ -20,10 +21,11 @@ const Auth = () => {
 
   // MFA state
   const [mfaResolver, setMfaResolver] = useState(null);
-  const [mfaStep, setMfaStep] = useState('none'); // none | select-factor | totp
+  const [mfaStep, setMfaStep] = useState('none'); // none | select-factor | sms-send | sms-verify
   const [mfaFactors, setMfaFactors] = useState([]);
   const [selectedFactor, setSelectedFactor] = useState(null);
-  const [totpCode, setTotpCode] = useState('');
+  const [smsCode, setSmsCode] = useState('');
+  const [smsVerificationId, setSmsVerificationId] = useState('');
   const [mfaError, setMfaError] = useState('');
   const [mfaBusy, setMfaBusy] = useState(false);
 
@@ -32,7 +34,8 @@ const Auth = () => {
     setMfaStep('none');
     setMfaFactors([]);
     setSelectedFactor(null);
-    setTotpCode('');
+    setSmsCode('');
+    setSmsVerificationId('');
     setMfaError('');
     setMfaBusy(false);
   };
@@ -133,7 +136,7 @@ const Auth = () => {
                 <div style={{ marginTop: 12 }}>
                   <p>Select a verification method:</p>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {mfaFactors.filter(h => h.factorId === 'totp').map((hint) => (
+                    {mfaFactors.filter(h => h.factorId === 'phone').map((hint) => (
                       <li key={hint.uid} style={{ marginBottom: 8 }}>
                         <button
                           type="button"
@@ -141,31 +144,64 @@ const Auth = () => {
                           style={{ width: '100%' }}
                           onClick={() => {
                             setSelectedFactor(hint);
-                            setMfaStep('totp');
+                            setMfaStep('sms-send');
                           }}
                         >
-                          Use Authenticator App
+                          Text message to {hint.phoneNumber || 'your phone'}
                         </button>
                       </li>
                     ))}
                   </ul>
-                  {mfaFactors.filter(h => h.factorId === 'totp').length === 0 && (
+                  {mfaFactors.filter(h => h.factorId === 'phone').length === 0 && (
                     <div className="error-message" style={{ marginTop: 8 }}>
-                      No TOTP factor available on this account. Please contact support or enroll TOTP from the dashboard.
+                      No SMS factor available on this account.
                     </div>
                   )}
                 </div>
               )}
 
-              {mfaStep === 'totp' && (
+              {mfaStep === 'sms-send' && (
                 <div style={{ marginTop: 12 }}>
-                  <label>Enter 6‑digit code from your Authenticator app</label>
+                  <p>We will send a code to {selectedFactor?.phoneNumber || 'your phone number'}.</p>
+                  {/* Invisible reCAPTCHA for MFA sign-in via SMS */}
+                  <div id="recaptcha-container-auth" style={{ height: 0 }}></div>
+                  <button
+                    type="button"
+                    className="auth-button"
+                    onClick={async () => {
+                      if (!mfaResolver || !selectedFactor) return;
+                      setMfaBusy(true);
+                      setMfaError('');
+                      try {
+                        const { verificationId } = await sendMfaSignInSms(
+                          mfaResolver,
+                          selectedFactor,
+                          'recaptcha-container-auth'
+                        );
+                        setSmsVerificationId(verificationId);
+                        setMfaStep('sms-verify');
+                      } catch (e) {
+                        setMfaError(e.message || 'Failed to send code');
+                      } finally {
+                        setMfaBusy(false);
+                      }
+                    }}
+                    disabled={mfaBusy}
+                  >
+                    {mfaBusy ? 'Sending…' : 'Send Code'}
+                  </button>
+                </div>
+              )}
+
+              {mfaStep === 'sms-verify' && (
+                <div style={{ marginTop: 12 }}>
+                  <label>Enter the 6‑digit SMS code</label>
                   <input
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    value={totpCode}
-                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                    value={smsCode}
+                    onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
                     placeholder="123456"
                     maxLength={8}
                     disabled={mfaBusy}
@@ -175,11 +211,11 @@ const Auth = () => {
                     type="button"
                     className="auth-button"
                     onClick={async () => {
-                      if (!mfaResolver || !selectedFactor) return;
+                      if (!mfaResolver || !smsVerificationId) return;
                       setMfaBusy(true);
                       setMfaError('');
                       try {
-                        await resolveMfaSignInWithTotp(mfaResolver, selectedFactor.uid, totpCode.trim());
+                        await resolveMfaSignInWithSms(mfaResolver, smsVerificationId, smsCode.trim());
                         resetMfaState();
                       } catch (e) {
                         setMfaError(e.message || 'Invalid code');
@@ -187,7 +223,7 @@ const Auth = () => {
                         setMfaBusy(false);
                       }
                     }}
-                    disabled={mfaBusy || totpCode.trim().length < 6}
+                    disabled={mfaBusy || smsCode.trim().length < 6}
                     style={{ marginTop: 12 }}
                   >
                     {mfaBusy ? 'Verifying…' : 'Verify and Sign In'}

@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { signOut, sendEmailVerification } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db, getEnrolledFactors, startTotpEnrollment, finalizeTotpEnrollment, unenrollMfaFactor } from '../services/firebase';
+import { auth, db, getEnrolledFactors, startSmsEnrollment, finalizeSmsEnrollment, unenrollMfaFactor } from '../services/firebase';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
@@ -24,10 +24,11 @@ const Dashboard = ({ user }) => {
 
   // MFA enrollment state
   const [showEnroll, setShowEnroll] = useState(false);
-  // TOTP-only enrollment (no SMS)
-  const [qrUrl, setQrUrl] = useState('');
-  const [totpSecretObj, setTotpSecretObj] = useState(null);
-  const [totpCode, setTotpCode] = useState('');
+  // SMS-only enrollment
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [smsVerificationId, setSmsVerificationId] = useState('');
+  const [smsCode, setSmsCode] = useState('');
+  const [recaptchaClear, setRecaptchaClear] = useState(null);
   const [mfaBusy, setMfaBusy] = useState(false);
   const [mfaError, setMfaError] = useState('');
   const [emailVerified, setEmailVerified] = useState(!!user?.emailVerified);
@@ -93,7 +94,7 @@ const Dashboard = ({ user }) => {
     const u = auth.currentUser;
     if (!u) return;
     const f = getEnrolledFactors(u);
-    setShowEnroll(!f.some((ff) => ff.factorId === 'totp'));
+    setShowEnroll(!f.some((ff) => ff.factorId === 'phone'));
   }, []);
 
   // Memoized total spending calculation
@@ -305,11 +306,11 @@ const Dashboard = ({ user }) => {
       </header>
 
       <main className="dashboard-main">
-        {/* MFA Enrollment Prompt (TOTP only) */}
+        {/* MFA Enrollment Prompt (SMS only) */}
         {showEnroll && (
           <div className="mfa-enroll" style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 16 }}>
             <h3>Protect your account with 2‑Step Verification</h3>
-            <p>Enable an extra layer of security using an Authenticator app (TOTP).</p>
+            <p>Enable an extra layer of security using SMS codes sent to your phone.</p>
 
             {!emailVerified ? (
               <div className="error-message" style={{ marginTop: 8 }}>
@@ -354,69 +355,106 @@ const Dashboard = ({ user }) => {
                   </div>
                 )}
 
-                {!qrUrl ? (
+                <div className="input-group">
+                  <label htmlFor="phone">Phone number (E.164)</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    placeholder="e.g. +15551234567"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.trim())}
+                    disabled={mfaBusy || !!smsVerificationId}
+                  />
+                </div>
+
+                {/* Invisible reCAPTCHA for SMS enrollment */}
+                <div id="recaptcha-container-enroll" style={{ height: 0 }}></div>
+
+                {!smsVerificationId ? (
                   <button
                     className="save-budget-btn"
                     disabled={mfaBusy}
                     onClick={async () => {
                       if (!auth.currentUser) return;
+                      const isValidE164 = /^\+[1-9]\d{1,14}$/;
+                      if (!isValidE164.test(phoneNumber)) {
+                        setMfaError('Enter a valid E.164 phone number (e.g., +15551234567).');
+                        return;
+                      }
                       setMfaBusy(true);
                       setMfaError('');
                       try {
-                        const { totpSecret, qrCodeUrl } = await startTotpEnrollment(auth.currentUser, { issuer: 'FinanceTracker' });
-                        setTotpSecretObj(totpSecret);
-                        setQrUrl(qrCodeUrl);
+                        // clear previous recaptcha if any
+                        if (recaptchaClear) {
+                          try { recaptchaClear(); } catch { /* ignore */ }
+                          setRecaptchaClear(null);
+                        }
+                        const { verificationId, clearRecaptcha } = await startSmsEnrollment(
+                          auth.currentUser,
+                          phoneNumber,
+                          'recaptcha-container-enroll',
+                          { size: 'invisible' }
+                        );
+                        setSmsVerificationId(verificationId);
+                        setRecaptchaClear(() => clearRecaptcha);
                       } catch (e) {
-                        if (e?.code === 'auth/unverified-email') {
-                          setMfaError('Email not verified. Please verify your email and try again.');
+                        if (e?.code === 'auth/billing-not-enabled') {
+                          setMfaError('SMS requires billing to be enabled on your Firebase project, or use test phone numbers in Authentication > Sign-in method.');
                         } else if (e?.code === 'auth/requires-recent-login') {
-                          setMfaError('Recent sign-in required. Please sign out, sign back in, and try enrolling again.');
+                          setMfaError('Recent sign-in required. Please sign out, sign back in, and try again.');
+                        } else if (e?.code === 'auth/invalid-phone-number') {
+                          setMfaError('Invalid phone number. Use E.164 format like +15551234567.');
                         } else {
-                          setMfaError(e.message || 'Failed to start TOTP enrollment');
+                          setMfaError(e.message || 'Failed to send SMS code');
                         }
                       } finally {
                         setMfaBusy(false);
                       }
                     }}
                   >
-                    {mfaBusy ? 'Preparing…' : 'Generate secret URL'}
+                    {mfaBusy ? 'Sending…' : 'Send Code'}
                   </button>
                 ) : (
-                  <div>
-                    <p>Open your Authenticator app and add a new account using this URL:</p>
-                    <textarea readOnly value={qrUrl} style={{ width: '100%', height: 80 }} />
-                    <button className="save-budget-btn" onClick={() => navigator.clipboard?.writeText(qrUrl)} style={{ marginTop: 6 }}>Copy URL</button>
-                    <div style={{ marginTop: 8 }}>
+                  <div style={{ marginTop: 8 }}>
+                    <label>Enter the 6‑digit SMS code</label>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
                       <input
                         type="text"
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        value={totpCode}
-                        onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                        value={smsCode}
+                        onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
                         placeholder="123456"
                         maxLength={8}
+                        disabled={mfaBusy}
                         style={{ width: 160 }}
                       />
                       <button
                         className="save-budget-btn"
-                        disabled={mfaBusy || totpCode.trim().length < 6}
+                        disabled={mfaBusy || smsCode.trim().length < 6}
                         onClick={async () => {
-                          if (!auth.currentUser || !totpSecretObj) return;
+                          if (!auth.currentUser || !smsVerificationId) return;
                           setMfaBusy(true);
                           setMfaError('');
                           try {
-                            await finalizeTotpEnrollment(auth.currentUser, totpSecretObj, totpCode.trim(), 'Authenticator');
+                            await finalizeSmsEnrollment(auth.currentUser, smsVerificationId, smsCode.trim(), 'SMS');
                             const updated = getEnrolledFactors(auth.currentUser);
-                            setShowEnroll(!updated.some((ff) => ff.factorId === 'totp'));
-                            setQrUrl('');
-                            setTotpSecretObj(null);
-                            setTotpCode('');
-                            alert('Authenticator app enrolled successfully.');
+                            setShowEnroll(!updated.some((ff) => ff.factorId === 'phone'));
+                            setSmsVerificationId('');
+                            setSmsCode('');
+                            setPhoneNumber('');
+                            if (recaptchaClear) {
+                              try { recaptchaClear(); } catch { /* ignore */ }
+                              setRecaptchaClear(null);
+                            }
+                            alert('Phone number enrolled successfully.');
                           } catch (e) {
-                            if (e?.code === 'auth/unverified-email') {
-                              setMfaError('Email not verified. Please verify your email and try again.');
+                            if (e?.code === 'auth/invalid-verification-code') {
+                              setMfaError('Invalid code. Please try again.');
+                            } else if (e?.code === 'auth/billing-not-enabled') {
+                              setMfaError('SMS requires billing to be enabled on your Firebase project, or use test phone numbers.');
                             } else if (e?.code === 'auth/requires-recent-login') {
-                              setMfaError('Recent sign-in required. Please sign out, sign back in, and try enrolling again.');
+                              setMfaError('Recent sign-in required. Please sign out, sign back in, and try again.');
                             } else {
                               setMfaError(e.message || 'Failed to verify code');
                             }
@@ -424,7 +462,6 @@ const Dashboard = ({ user }) => {
                             setMfaBusy(false);
                           }
                         }}
-                        style={{ marginLeft: 8 }}
                       >
                         {mfaBusy ? 'Verifying…' : 'Verify'}
                       </button>
