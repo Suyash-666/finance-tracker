@@ -5,8 +5,6 @@ import {
   auth,
   googleProvider,
   createMfaResolverFromError,
-  sendMfaSignInSms,
-  resolveMfaSignInWithSms,
   resolveMfaSignInWithTotp
 } from '../services/firebase';
 import { FaGoogle, FaEye, FaEyeSlash, FaChartLine } from 'react-icons/fa';
@@ -22,12 +20,10 @@ const Auth = () => {
 
   // MFA state
   const [mfaResolver, setMfaResolver] = useState(null);
-  const [mfaStep, setMfaStep] = useState('none'); // none | select-factor | totp | sms-send | sms-verify
+  const [mfaStep, setMfaStep] = useState('none'); // none | select-factor | totp
   const [mfaFactors, setMfaFactors] = useState([]);
   const [selectedFactor, setSelectedFactor] = useState(null);
   const [totpCode, setTotpCode] = useState('');
-  const [smsCode, setSmsCode] = useState('');
-  const [smsVerificationId, setSmsVerificationId] = useState('');
   const [mfaError, setMfaError] = useState('');
   const [mfaBusy, setMfaBusy] = useState(false);
 
@@ -37,8 +33,6 @@ const Auth = () => {
     setMfaFactors([]);
     setSelectedFactor(null);
     setTotpCode('');
-    setSmsCode('');
-    setSmsVerificationId('');
     setMfaError('');
     setMfaBusy(false);
   };
@@ -139,7 +133,7 @@ const Auth = () => {
                 <div style={{ marginTop: 12 }}>
                   <p>Select a verification method:</p>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {mfaFactors.map((hint) => (
+                    {mfaFactors.filter(h => h.factorId === 'totp').map((hint) => (
                       <li key={hint.uid} style={{ marginBottom: 8 }}>
                         <button
                           type="button"
@@ -147,20 +141,19 @@ const Auth = () => {
                           style={{ width: '100%' }}
                           onClick={() => {
                             setSelectedFactor(hint);
-                            if (hint.factorId === 'totp') {
-                              setMfaStep('totp');
-                            } else if (hint.factorId === 'phone') {
-                              setMfaStep('sms-send');
-                            } else {
-                              setMfaError('Unsupported factor type');
-                            }
+                            setMfaStep('totp');
                           }}
                         >
-                          {hint.factorId === 'totp' ? 'Use Authenticator App' : `Text message to ${hint.phoneNumber || 'your phone'}`}
+                          Use Authenticator App
                         </button>
                       </li>
                     ))}
                   </ul>
+                  {mfaFactors.filter(h => h.factorId === 'totp').length === 0 && (
+                    <div className="error-message" style={{ marginTop: 8 }}>
+                      No TOTP factor available on this account. Please contact support or enroll TOTP from the dashboard.
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -202,76 +195,7 @@ const Auth = () => {
                 </div>
               )}
 
-              {mfaStep === 'sms-send' && (
-                <div style={{ marginTop: 12 }}>
-                  <p>We will send a code to {selectedFactor?.phoneNumber || 'your phone number'}.</p>
-                  {/* Invisible reCAPTCHA for MFA sign-in via SMS */}
-                  <div id="recaptcha-container-auth" style={{ height: 0 }}></div>
-                  <button
-                    type="button"
-                    className="auth-button"
-                    onClick={async () => {
-                      if (!mfaResolver || !selectedFactor) return;
-                      setMfaBusy(true);
-                      setMfaError('');
-                      try {
-                        const { verificationId } = await sendMfaSignInSms(
-                          mfaResolver,
-                          selectedFactor,
-                          'recaptcha-container-auth'
-                        );
-                        setSmsVerificationId(verificationId);
-                        setMfaStep('sms-verify');
-                      } catch (e) {
-                        setMfaError(e.message || 'Failed to send code');
-                      } finally {
-                        setMfaBusy(false);
-                      }
-                    }}
-                    disabled={mfaBusy}
-                  >
-                    {mfaBusy ? 'Sending…' : 'Send Code'}
-                  </button>
-                </div>
-              )}
-
-              {mfaStep === 'sms-verify' && (
-                <div style={{ marginTop: 12 }}>
-                  <label>Enter the 6‑digit SMS code</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={smsCode}
-                    onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
-                    placeholder="123456"
-                    maxLength={8}
-                    disabled={mfaBusy}
-                    style={{ width: '100%', marginTop: 8 }}
-                  />
-                  <button
-                    type="button"
-                    className="auth-button"
-                    onClick={async () => {
-                      if (!mfaResolver || !smsVerificationId) return;
-                      setMfaBusy(true);
-                      setMfaError('');
-                      try {
-                        await resolveMfaSignInWithSms(mfaResolver, smsVerificationId, smsCode.trim());
-                        resetMfaState();
-                      } catch (e) {
-                        setMfaError(e.message || 'Invalid code');
-                      } finally {
-                        setMfaBusy(false);
-                      }
-                    }}
-                    disabled={mfaBusy || smsCode.trim().length < 6}
-                    style={{ marginTop: 12 }}
-                  >
-                    {mfaBusy ? 'Verifying…' : 'Verify and Sign In'}
-                  </button>
-                </div>
-              )}
+              {/* SMS-based MFA is disabled in this app to avoid SMS billing. */}
             </div>
           )}
 
