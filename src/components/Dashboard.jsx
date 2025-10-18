@@ -1,8 +1,8 @@
 // src/components/Dashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
-import { signOut, sendEmailVerification } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db, getEnrolledFactors, startSmsEnrollment, finalizeSmsEnrollment, unenrollMfaFactor } from '../services/firebase';
+import { auth, db } from '../services/firebase';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
@@ -22,20 +22,7 @@ const Dashboard = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [saveError, setSaveError] = useState('');
 
-  // MFA enrollment state
-  const [showEnroll, setShowEnroll] = useState(false);
-  // SMS-only enrollment
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [smsVerificationId, setSmsVerificationId] = useState('');
-  const [smsCode, setSmsCode] = useState('');
-  const [recaptchaClear, setRecaptchaClear] = useState(null);
-  const [mfaBusy, setMfaBusy] = useState(false);
-  const [mfaError, setMfaError] = useState('');
-  const [emailVerified, setEmailVerified] = useState(!!user?.emailVerified);
-
-  useEffect(() => {
-    setEmailVerified(!!user?.emailVerified);
-  }, [user]);
+  // No MFA state — single-factor only
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -89,13 +76,7 @@ const Dashboard = ({ user }) => {
     return () => unsubscribe();
   }, [refreshTrigger]);
 
-  // Load MFA factors for current user
-  useEffect(() => {
-    const u = auth.currentUser;
-    if (!u) return;
-    const f = getEnrolledFactors(u);
-    setShowEnroll(!f.some((ff) => ff.factorId === 'phone'));
-  }, []);
+  // No MFA factors to load
 
   // Memoized total spending calculation
   const totalSpent = useMemo(() => {
@@ -306,172 +287,7 @@ const Dashboard = ({ user }) => {
       </header>
 
       <main className="dashboard-main">
-        {/* MFA Enrollment Prompt (SMS only) */}
-        {showEnroll && (
-          <div className="mfa-enroll" style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 16 }}>
-            <h3>Protect your account with 2‑Step Verification</h3>
-            <p>Enable an extra layer of security using SMS codes sent to your phone.</p>
-
-            {!emailVerified ? (
-              <div className="error-message" style={{ marginTop: 8 }}>
-                <strong>Email not verified.</strong> Verify your email before enrolling second factors.
-                <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                  <button
-                    className="save-budget-btn"
-                    onClick={async () => {
-                      if (!auth.currentUser) return;
-                      try {
-                        await sendEmailVerification(auth.currentUser);
-                        alert('Verification email sent. Please check your inbox.');
-                      } catch (e) {
-                        alert(e.message || 'Failed to send verification email');
-                      }
-                    }}
-                  >
-                    Send verification email
-                  </button>
-                  <button
-                    className="save-budget-btn"
-                    onClick={async () => {
-                      if (!auth.currentUser) return;
-                      try {
-                        await auth.currentUser.reload();
-                        setEmailVerified(!!auth.currentUser.emailVerified);
-                      } catch (e) {
-                        alert(e.message || 'Failed to refresh user');
-                      }
-                    }}
-                  >
-                    I've verified – Re-check
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div style={{ marginTop: 12 }}>
-                {mfaError && (
-                  <div className="error-message" style={{ marginBottom: 8 }}>
-                    <span className="error-icon">⚠️</span>
-                    {mfaError}
-                  </div>
-                )}
-
-                <div className="input-group">
-                  <label htmlFor="phone">Phone number (E.164)</label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    placeholder="e.g. +15551234567"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.trim())}
-                    disabled={mfaBusy || !!smsVerificationId}
-                  />
-                </div>
-
-                {/* Invisible reCAPTCHA for SMS enrollment */}
-                <div id="recaptcha-container-enroll" style={{ height: 0 }}></div>
-
-                {!smsVerificationId ? (
-                  <button
-                    className="save-budget-btn"
-                    disabled={mfaBusy}
-                    onClick={async () => {
-                      if (!auth.currentUser) return;
-                      const isValidE164 = /^\+[1-9]\d{1,14}$/;
-                      if (!isValidE164.test(phoneNumber)) {
-                        setMfaError('Enter a valid E.164 phone number (e.g., +15551234567).');
-                        return;
-                      }
-                      setMfaBusy(true);
-                      setMfaError('');
-                      try {
-                        // clear previous recaptcha if any
-                        if (recaptchaClear) {
-                          try { recaptchaClear(); } catch { /* ignore */ }
-                          setRecaptchaClear(null);
-                        }
-                        const { verificationId, clearRecaptcha } = await startSmsEnrollment(
-                          auth.currentUser,
-                          phoneNumber,
-                          'recaptcha-container-enroll',
-                          { size: 'invisible' }
-                        );
-                        setSmsVerificationId(verificationId);
-                        setRecaptchaClear(() => clearRecaptcha);
-                      } catch (e) {
-                        if (e?.code === 'auth/billing-not-enabled') {
-                          setMfaError('SMS requires billing to be enabled on your Firebase project, or use test phone numbers in Authentication > Sign-in method.');
-                        } else if (e?.code === 'auth/requires-recent-login') {
-                          setMfaError('Recent sign-in required. Please sign out, sign back in, and try again.');
-                        } else if (e?.code === 'auth/invalid-phone-number') {
-                          setMfaError('Invalid phone number. Use E.164 format like +15551234567.');
-                        } else {
-                          setMfaError(e.message || 'Failed to send SMS code');
-                        }
-                      } finally {
-                        setMfaBusy(false);
-                      }
-                    }}
-                  >
-                    {mfaBusy ? 'Sending…' : 'Send Code'}
-                  </button>
-                ) : (
-                  <div style={{ marginTop: 8 }}>
-                    <label>Enter the 6‑digit SMS code</label>
-                    <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        value={smsCode}
-                        onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
-                        placeholder="123456"
-                        maxLength={8}
-                        disabled={mfaBusy}
-                        style={{ width: 160 }}
-                      />
-                      <button
-                        className="save-budget-btn"
-                        disabled={mfaBusy || smsCode.trim().length < 6}
-                        onClick={async () => {
-                          if (!auth.currentUser || !smsVerificationId) return;
-                          setMfaBusy(true);
-                          setMfaError('');
-                          try {
-                            await finalizeSmsEnrollment(auth.currentUser, smsVerificationId, smsCode.trim(), 'SMS');
-                            const updated = getEnrolledFactors(auth.currentUser);
-                            setShowEnroll(!updated.some((ff) => ff.factorId === 'phone'));
-                            setSmsVerificationId('');
-                            setSmsCode('');
-                            setPhoneNumber('');
-                            if (recaptchaClear) {
-                              try { recaptchaClear(); } catch { /* ignore */ }
-                              setRecaptchaClear(null);
-                            }
-                            alert('Phone number enrolled successfully.');
-                          } catch (e) {
-                            if (e?.code === 'auth/invalid-verification-code') {
-                              setMfaError('Invalid code. Please try again.');
-                            } else if (e?.code === 'auth/billing-not-enabled') {
-                              setMfaError('SMS requires billing to be enabled on your Firebase project, or use test phone numbers.');
-                            } else if (e?.code === 'auth/requires-recent-login') {
-                              setMfaError('Recent sign-in required. Please sign out, sign back in, and try again.');
-                            } else {
-                              setMfaError(e.message || 'Failed to verify code');
-                            }
-                          } finally {
-                            setMfaBusy(false);
-                          }
-                        }}
-                      >
-                        {mfaBusy ? 'Verifying…' : 'Verify'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        {/* No MFA enrollment in single-factor mode */}
 
         {/* Overview tab content */}
         {activeTab === 'overview' && (
@@ -581,46 +397,7 @@ const Dashboard = ({ user }) => {
           </div>
         )}
 
-        {/* Security Section: Show enrolled MFA factors with unenroll option */}
-        <div className="security-section" style={{ marginTop: 24 }}>
-          <h3>Security</h3>
-          <p>Two‑Step Verification factors linked to your account:</p>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {(() => {
-              const u = auth.currentUser;
-              const currentFactors = u ? getEnrolledFactors(u) : [];
-              if (!currentFactors.length) {
-                return <li>No factors enrolled.</li>;
-              }
-              return currentFactors.map((f) => (
-                <li key={f.uid} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <span style={{ minWidth: 80, fontWeight: 600 }}>{f.factorId === 'phone' ? 'SMS' : 'TOTP'}</span>
-                  <span style={{ flex: 1, opacity: 0.8 }}>
-                    {f.factorId === 'phone' ? f.phoneNumber : (f.displayName || 'Authenticator')}
-                  </span>
-                  <button
-                    className="sign-out-button"
-                    onClick={async () => {
-                      if (!auth.currentUser) return;
-                      const confirm = window.confirm('Unenroll this 2FA factor? You may be required to re-authenticate later.');
-                      if (!confirm) return;
-                      try {
-                        await unenrollMfaFactor(auth.currentUser, f.uid);
-                        // trigger refresh of the enroll prompt
-                        const updated = getEnrolledFactors(auth.currentUser);
-                        setShowEnroll(!updated.some((ff) => ff.factorId === 'totp'));
-                      } catch (e) {
-                        alert(e.message || 'Failed to unenroll factor');
-                      }
-                    }}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ));
-            })()}
-          </ul>
-        </div>
+        {/* Security section removed (no MFA) */}
       </main>
     </div>
   );
