@@ -22,8 +22,6 @@ const Dashboard = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [saveError, setSaveError] = useState('');
 
-  // No MFA state — single-factor only
-
   useEffect(() => {
     if (!auth.currentUser) return;
 
@@ -75,8 +73,6 @@ const Dashboard = ({ user }) => {
 
     return () => unsubscribe();
   }, [refreshTrigger]);
-
-  // No MFA factors to load
 
   // Memoized total spending calculation
   const totalSpent = useMemo(() => {
@@ -287,8 +283,6 @@ const Dashboard = ({ user }) => {
       </header>
 
       <main className="dashboard-main">
-        {/* No MFA enrollment in single-factor mode */}
-
         {/* Overview tab content */}
         {activeTab === 'overview' && (
           <>

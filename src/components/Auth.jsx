@@ -13,8 +13,6 @@ const Auth = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // No MFA state – single-factor only
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -40,11 +38,7 @@ const Auth = () => {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      if (error?.code === 'auth/multi-factor-auth-required') {
-        setError('This account has 2‑Step Verification enabled, which is not supported in this app. Please disable MFA for this account in Firebase Console and try again.');
-      } else {
-        setError(error.message);
-      }
+      setError(error.message);
     }
 
     setLoading(false);
