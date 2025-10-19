@@ -1,16 +1,124 @@
-# React + Vite
+# Finance Tracker 💰
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, feature-rich expense tracking application built with React and Firebase. Track your expenses, visualize spending patterns with interactive charts and analytics.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔐 **Authentication**: Email/password and Google OAuth sign-in
+- 📊 **Expense Management**: Add, edit, and delete expenses with categories
+- 📈 **Visual Analytics**: Interactive charts showing spending patterns
+- 🎤 **Voice Input**: Add expenses using voice commands
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile
+- 🎨 **Modern UI**: Beautiful gradient designs and smooth animations
 
-## React Compiler
+##  Quick Start
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+- Firebase account
 
-## Expanding the ESLint configuration
+### Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Configure Firebase**
+   
+   Your Firebase is already configured in `src/services/firebase.js`
+
+3. **Start development server**
+   ```bash
+   npm run dev
+   ```
+   
+   App will run on `http://localhost:5173`
+
+4. **Deploy to GitHub Pages**
+   ```bash
+   npm run build
+   npm run deploy
+   ```
+
+## 🏗️ Project Structure
+
+```
+finance-tracker/
+├── src/
+│   ├── components/          # React components
+│   │   ├── Auth.jsx        # Authentication
+│   │   ├── Dashboard.jsx   # Main dashboard
+│   │   ├── ExpenseForm.jsx # Add/edit expenses
+│   │   ├── ExpenseList.jsx # Expense table
+│   │   └── ExpenseCharts.jsx # Charts
+│   ├── services/           # Firebase & services
+│   │   ├── firebase.js     # Firebase config
+│   │   └── speechRecognition.js
+│   └── styles/             # CSS files
+│
+├── public/                 # Static assets
+└── README.md              # This file
+```
+
+## 🎯 Key Features
+
+### Authentication
+- Email/password sign-up and login
+- Google OAuth integration
+- Secure Firebase Authentication
+
+### Expense Tracking
+- Add expenses with amount, category, and description
+- Edit and delete expenses
+- Categorize spending (Food, Transport, Shopping, etc.)
+- Date tracking for all expenses
+
+### Visual Analytics
+- Interactive pie charts showing category breakdown
+- Spending trends over time
+- Category-wise analysis
+- Responsive Chart.js visualizations
+
+### Voice Commands
+- Add expenses using voice input
+- Speech recognition for quick entry
+- Hands-free expense tracking
+
+## 📦 Technologies Used
+
+- React 19
+- Firebase (Authentication & Firestore)
+- Chart.js for visualizations
+- Vite for build tooling
+- React Icons
+
+## 🔒 Security
+
+- Firebase Authentication for secure user management
+- Firestore security rules for data protection
+- Environment variables for sensitive data
+
+## 🚀 Deployment
+
+The app is configured to deploy to GitHub Pages:
+
+```bash
+npm run build
+npm run deploy
+```
+
+Your app will be live at: `https://yourusername.github.io/finance-tracker`
+
+## 📝 License
+
+MIT
+
+## 🤝 Contributing
+
+Contributions welcome! Feel free to open issues or submit PRs.
+
+---
+
+Built with ❤️ using React and Firebase

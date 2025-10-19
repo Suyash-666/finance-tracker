@@ -1,10 +1,14 @@
-/* ExpenseCharts Component Styles */
+/* ExpenseCharts Component Styles - Cyber Space Theme */
 
 .expense-charts-container {
   padding: 2rem;
-  background: #f8fafc;
+  background: rgba(0, 8, 20, 0.85);
   border-radius: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    0 0 40px rgba(0, 240, 255, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(0, 240, 255, 0.4);
+  backdrop-filter: blur(10px);
 }
 
 .charts-header {
@@ -26,40 +30,48 @@
 .charts-title h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #00f0ff;
   margin: 0;
+  font-family: 'Orbitron', monospace;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 
+    0 0 20px rgba(0, 240, 255, 0.8),
+    0 0 40px rgba(0, 240, 255, 0.5);
 }
 
 .time-filter {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #fff;
+  background: rgba(0, 0, 0, 0.6);
   padding: 0.5rem 1rem;
   border-radius: 10px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
 }
 
 .calendar-icon {
-  color: #6b7280;
+  color: #00f0ff;
 }
 
 .time-filter select {
   border: none;
   background: none;
-  color: #374151;
+  color: #00f0ff;
   font-weight: 500;
   cursor: pointer;
   outline: none;
+  font-family: 'Orbitron', monospace;
 }
 
 .chart-controls {
   display: flex;
   gap: 0.5rem;
-  background: #fff;
+  background: rgba(0, 0, 0, 0.6);
   padding: 0.25rem;
   border-radius: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(0, 240, 255, 0.3);
 }
 
 .chart-btn {
@@ -72,18 +84,22 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
-  color: #6b7280;
-  transition: all 0.2s ease;
+  color: rgba(0, 240, 255, 0.7);
+  transition: all 0.3s ease;
+  font-family: 'Orbitron', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .chart-btn.active {
-  background: #4f46e5;
-  color: #fff;
+  background: linear-gradient(135deg, #00f0ff 0%, #FFA500 100%);
+  color: #000;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
 }
 
 .chart-btn:hover:not(.active) {
-  background: #f3f4f6;
-  color: #374151;
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
 }
 
 .stats-cards {
@@ -94,20 +110,23 @@
 }
 
 .stat-card {
-  background: #fff;
+  background: rgba(0, 0, 0, 0.6);
   padding: 1.5rem;
   border-radius: 15px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(0, 240, 255, 0.3);
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: #4f46e5;
+  transform: translateY(-3px);
+  box-shadow: 
+    0 0 30px rgba(0, 240, 255, 0.3),
+    0 8px 25px rgba(0, 0, 0, 0.5);
+  border-color: #00f0ff;
 }
 
 .stat-icon {
@@ -117,32 +136,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #00f0ff 0%, #FFA500 100%);
+  color: #000;
   border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
 }
 
 .stat-info h4 {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: rgba(0, 240, 255, 0.7);
   margin: 0 0 0.25rem 0;
   font-weight: 500;
+  font-family: 'Orbitron', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .stat-info p {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #00f0ff;
   margin: 0;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
 }
 
 .chart-container {
-  background: #fff;
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 20px;
   padding: 2rem;
   margin-bottom: 2rem;
-  border: 2px solid #e5e7eb;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
 }
 
 .chart-wrapper {
@@ -154,39 +178,47 @@
 
 .no-data {
   text-align: center;
-  color: #6b7280;
+  color: rgba(0, 240, 255, 0.7);
 }
 
 .no-data-icon {
   font-size: 4rem;
   margin-bottom: 1rem;
   opacity: 0.5;
+  color: #00f0ff;
 }
 
 .no-data h4 {
   font-size: 1.25rem;
   margin: 0 0 0.5rem 0;
-  color: #374151;
+  color: #00f0ff;
+  font-family: 'Orbitron', monospace;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
 
 .no-data p {
   margin: 0;
   font-size: 1rem;
+  color: rgba(0, 240, 255, 0.7);
 }
 
 .category-breakdown {
-  background: #fff;
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 20px;
   padding: 2rem;
-  border: 2px solid #e5e7eb;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
 }
 
 .category-breakdown h4 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #00f0ff;
   margin: 0 0 1.5rem 0;
+  font-family: 'Orbitron', monospace;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
 }
 
 .category-list {
@@ -197,15 +229,18 @@
 
 .category-item {
   padding: 1rem;
-  background: #f8fafc;
+  background: rgba(0, 8, 20, 0.8);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
 }
 
 .category-item:hover {
-  background: #f1f5f9;
+  background: rgba(30, 25, 0, 0.9);
   transform: translateX(5px);
+  border-color: #00f0ff;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
 }
 
 .category-info {
@@ -222,15 +257,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: #00f0ff;
 }
 
 .category-name {
   font-weight: 600;
-  color: #374151;
+  color: #00f0ff;
   flex: 1;
+  font-family: 'Orbitron', monospace;
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
 }
 
 .category-stats {
@@ -243,21 +281,24 @@
 .category-amount {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
 
 .category-percentage {
   font-size: 0.9rem;
-  color: #6b7280;
-  background: #e5e7eb;
+  color: rgba(0, 240, 255, 0.8);
+  background: rgba(0, 240, 255, 0.2);
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
 }
 
 .category-bar {
   height: 6px;
   border-radius: 3px;
   transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
 
 /* Responsive Design */
