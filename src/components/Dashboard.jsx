@@ -1,6 +1,5 @@
 // src/components/Dashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
@@ -13,19 +12,7 @@ import '../styles/Dashboard.css';
 const Dashboard = ({ user }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [expenses, setExpenses] = useState([]);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const getActiveView = () => {
-    const path = location.pathname || '';
-    if (path.includes('/dashboard/add')) return 'add';
-    if (path.includes('/dashboard/list')) return 'list';
-    if (path.includes('/dashboard/profile')) return 'profile';
-    if (path.includes('/dashboard/settings')) return 'settings';
-    if (path.includes('/dashboard/budgets')) return 'budgets';
-    return 'overview';
-  };
-  const activeTab = getActiveView();
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Budget state with loading indicator
   const [budget, setBudget] = useState(null);
@@ -230,7 +217,6 @@ const Dashboard = ({ user }) => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -262,24 +248,48 @@ const Dashboard = ({ user }) => {
         </div>
 
         <nav className="dashboard-nav">
-          <NavLink to="/dashboard" end className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
+          <button
+            className={`nav-btn ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
             <FaChartPie /> Overview
-          </NavLink>
-          <NavLink to="/dashboard/add" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
+          </button>
+          <button
+            className={`nav-btn ${activeTab === 'add' ? 'active' : ''}`}
+            onClick={() => setActiveTab('add')}
+          >
             <FaPlus /> Add Expense
-          </NavLink>
-          <NavLink to="/dashboard/list" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
+          </button>
+          <button
+            className={`nav-btn ${activeTab === 'list' ? 'active' : ''}`}
+            onClick={() => setActiveTab('list')}
+          >
             <FaList /> All Expenses
-          </NavLink>
-          <NavLink to="/dashboard/profile" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
-            <FaUser /> Profile
-          </NavLink>
-          <NavLink to="/dashboard/settings" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
-            ⚙️ Settings
-          </NavLink>
-          <NavLink to="/dashboard/budgets" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
-            🧭 Budgets
-          </NavLink>
+          </button>
+          <button
+            className={`nav-btn ${activeTab === 'budget' ? 'active' : ''}`}
+            onClick={() => setActiveTab('budget')}
+          >
+            💰 Budget
+          </button>
+          <button
+            className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
+            onClick={() => setActiveTab('reports')}
+          >
+            📊 Reports
+          </button>
+          <button
+            className={`nav-btn ${activeTab === 'about' ? 'active' : ''}`}
+            onClick={() => setActiveTab('about')}
+          >
+            ℹ️ About
+          </button>
+          <button
+            className={`nav-btn ${activeTab === 'help' ? 'active' : ''}`}
+            onClick={() => setActiveTab('help')}
+          >
+            ❓ Help
+          </button>
         </nav>
 
         <div className="user-info">
@@ -405,33 +415,94 @@ const Dashboard = ({ user }) => {
           </div>
         )}
 
-        {activeTab === 'profile' && (
-          <div className="profile-tab">
+        {activeTab === 'budget' && (
+          <div className="budget-tab">
             <div className="list-section">
-              <h2>Profile</h2>
-              <div className="user-avatar" style={{ marginBottom: 16 }}>
-                <img src={getUserAvatar()} alt="User Avatar" />
+              <h2>Budget Management</h2>
+              <p>Set and manage your monthly budgets across different categories.</p>
+              <div className="budget-summary">
+                <div className="summary-item">
+                  <span className="label">Current Budget:</span>
+                  <span className="value">${budget !== null ? budget.toFixed(2) : '0.00'}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="label">Total Spent:</span>
+                  <span className="value">${totalSpent.toFixed(2)}</span>
+                </div>
+                {budget !== null && budget > 0 && (
+                  <div className="summary-item">
+                    <span className="label">Remaining:</span>
+                    <span className={`value ${budgetMetrics.remaining < 0 ? 'negative' : 'positive'}`}>
+                      ${budgetMetrics.remaining.toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
-              <p><strong>Name:</strong> {getUserDisplayName()}</p>
-              <p><strong>Email:</strong> {user.email}</p>
             </div>
           </div>
         )}
 
-        {activeTab === 'settings' && (
-          <div className="settings-tab">
+        {activeTab === 'reports' && (
+          <div className="reports-tab">
             <div className="list-section">
-              <h2>Settings</h2>
-              <p>Coming soon: theme, currency, and notification settings.</p>
+              <h2>Financial Reports</h2>
+              <p>View detailed reports and analytics of your expenses.</p>
+              <div className="charts-section">
+                <ExpenseCharts expenses={expenses} />
+              </div>
+              <div className="report-summary" style={{ marginTop: '2rem' }}>
+                <h3>Summary</h3>
+                <p>Total Expenses: <strong>${totalSpent.toFixed(2)}</strong></p>
+                <p>Number of Transactions: <strong>{expenses.length}</strong></p>
+                {expenses.length > 0 && (
+                  <p>Average Transaction: <strong>${(totalSpent / expenses.length).toFixed(2)}</strong></p>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {activeTab === 'budgets' && (
-          <div className="budgets-tab">
+        {activeTab === 'about' && (
+          <div className="about-tab">
             <div className="list-section">
-              <h2>Budgets</h2>
-              <p>Use Budget & Income in Overview to configure. More advanced budget planning coming soon.</p>
+              <h2>About FinanceTracker</h2>
+              <p><strong>Version:</strong> 1.0.0</p>
+              <p><strong>Description:</strong> FinanceTracker is a modern expense tracking application that helps you manage your personal finances with ease.</p>
+              <h3>Features</h3>
+              <ul>
+                <li>📊 Visual expense analytics with charts</li>
+                <li>🎤 Voice-enabled expense entry</li>
+                <li>💰 Budget tracking and alerts</li>
+                <li>🔒 Secure authentication with Firebase</li>
+                <li>📱 Responsive design for all devices</li>
+              </ul>
+              <p style={{ marginTop: '1rem' }}><strong>Developer:</strong> Suyash</p>
+              <p><strong>GitHub:</strong> <a href="https://github.com/Suyash-666/finance-tracker" target="_blank" rel="noopener noreferrer">github.com/Suyash-666/finance-tracker</a></p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'help' && (
+          <div className="help-tab">
+            <div className="list-section">
+              <h2>Help & Support</h2>
+              <h3>Getting Started</h3>
+              <p>Welcome to FinanceTracker! Here's how to use the app:</p>
+              <ol>
+                <li><strong>Add Expenses:</strong> Click "Add Expense" to record a new transaction. You can use voice input or manual entry.</li>
+                <li><strong>View Expenses:</strong> Click "All Expenses" to see your transaction history.</li>
+                <li><strong>Track Budget:</strong> Set your monthly budget and income in the Overview tab to monitor your spending.</li>
+                <li><strong>View Reports:</strong> Check the Reports tab for visual analytics and summaries.</li>
+              </ol>
+              <h3>Frequently Asked Questions</h3>
+              <p><strong>Q: How do I edit an expense?</strong></p>
+              <p>A: Go to "All Expenses" and click the edit icon next to any transaction.</p>
+              <p><strong>Q: Can I export my data?</strong></p>
+              <p>A: Data export feature is coming soon!</p>
+              <p><strong>Q: Is my data secure?</strong></p>
+              <p>A: Yes! All data is stored securely in Firebase with authentication.</p>
+              <h3>Need More Help?</h3>
+              <p>Contact support at: <a href="mailto:support@financetracker.com">support@financetracker.com</a></p>
             </div>
           </div>
         )}
