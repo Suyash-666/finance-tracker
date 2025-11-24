@@ -8,6 +8,7 @@ import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
 import { FaChartLine, FaUser, FaSignOutAlt, FaPlus, FaList, FaChartPie } from 'react-icons/fa';
 import '../styles/Dashboard.css';
+import '../styles/NewTabs.css';
 
 const Dashboard = ({ user }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -418,25 +419,38 @@ const Dashboard = ({ user }) => {
         {activeTab === 'budget' && (
           <div className="budget-tab">
             <div className="list-section">
-              <h2>Budget Management</h2>
-              <p>Set and manage your monthly budgets across different categories.</p>
+              <h2>💰 Budget Management</h2>
+              <p>Monitor and manage your monthly budget allocations. Track your spending against set limits to maintain financial discipline.</p>
+              
               <div className="budget-summary">
                 <div className="summary-item">
-                  <span className="label">Current Budget:</span>
+                  <span className="label">Monthly Budget</span>
                   <span className="value">${budget !== null ? budget.toFixed(2) : '0.00'}</span>
                 </div>
                 <div className="summary-item">
-                  <span className="label">Total Spent:</span>
+                  <span className="label">Total Spent</span>
                   <span className="value">${totalSpent.toFixed(2)}</span>
                 </div>
                 {budget !== null && budget > 0 && (
-                  <div className="summary-item">
-                    <span className="label">Remaining:</span>
-                    <span className={`value ${budgetMetrics.remaining < 0 ? 'negative' : 'positive'}`}>
-                      ${budgetMetrics.remaining.toFixed(2)}
-                    </span>
-                  </div>
+                  <>
+                    <div className="summary-item">
+                      <span className="label">Remaining Budget</span>
+                      <span className={`value ${budgetMetrics.remaining < 0 ? 'negative' : 'positive'}`}>
+                        ${Math.abs(budgetMetrics.remaining).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="summary-item">
+                      <span className="label">Budget Usage</span>
+                      <span className="value">{budgetMetrics.percent.toFixed(1)}%</span>
+                    </div>
+                  </>
                 )}
+              </div>
+
+              <div className="budget-controls">
+                <button onClick={() => setActiveTab('overview')}>
+                  ⚙️ Configure Budget
+                </button>
               </div>
             </div>
           </div>
@@ -445,18 +459,99 @@ const Dashboard = ({ user }) => {
         {activeTab === 'reports' && (
           <div className="reports-tab">
             <div className="list-section">
-              <h2>Financial Reports</h2>
-              <p>View detailed reports and analytics of your expenses.</p>
-              <div className="charts-section">
-                <ExpenseCharts expenses={expenses} />
+              <div className="report-header">
+                <h2>📊 Financial Analytics Report</h2>
+                <div className="report-date">Generated on {new Date().toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}</div>
               </div>
-              <div className="report-summary" style={{ marginTop: '2rem' }}>
-                <h3>Summary</h3>
-                <p>Total Expenses: <strong>${totalSpent.toFixed(2)}</strong></p>
-                <p>Number of Transactions: <strong>{expenses.length}</strong></p>
-                {expenses.length > 0 && (
-                  <p>Average Transaction: <strong>${(totalSpent / expenses.length).toFixed(2)}</strong></p>
-                )}
+
+              <div className="report-section">
+                <h3>Executive Summary</h3>
+                <div className="analytics-description">
+                  This comprehensive financial report provides detailed insights into your spending patterns, 
+                  transaction history, and budget performance metrics for the current period.
+                </div>
+
+                <div className="metric-grid">
+                  <div className="metric-card">
+                    <div className="metric-label">Total Expenditure</div>
+                    <div className="metric-value">${totalSpent.toFixed(2)}</div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="metric-label">Total Transactions</div>
+                    <div className="metric-value">{expenses.length}</div>
+                  </div>
+                  {expenses.length > 0 && (
+                    <>
+                      <div className="metric-card">
+                        <div className="metric-label">Average Transaction</div>
+                        <div className="metric-value">${(totalSpent / expenses.length).toFixed(2)}</div>
+                      </div>
+                      <div className="metric-card">
+                        <div className="metric-label">Largest Expense</div>
+                        <div className="metric-value">
+                          ${Math.max(...expenses.map(e => parseFloat(e.amount || 0))).toFixed(2)}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="report-section">
+                <h3>Visual Analytics</h3>
+                <div className="analytics-description">
+                  The charts below illustrate spending distribution by category and temporal trends 
+                  to help identify key patterns and optimization opportunities.
+                </div>
+                <div className="charts-section">
+                  <ExpenseCharts expenses={expenses} />
+                </div>
+              </div>
+
+              {budget !== null && budget > 0 && (
+                <div className="report-section">
+                  <h3>Budget Performance Analysis</h3>
+                  <div className="metric-grid">
+                    <div className="metric-card">
+                      <div className="metric-label">Allocated Budget</div>
+                      <div className="metric-value">${budget.toFixed(2)}</div>
+                    </div>
+                    <div className="metric-card">
+                      <div className="metric-label">Budget Utilization</div>
+                      <div className="metric-value">{budgetMetrics.percent.toFixed(1)}%</div>
+                      <div className={`metric-change ${budgetMetrics.percent <= 80 ? 'positive' : 'negative'}`}>
+                        {budgetMetrics.percent <= 80 ? '✓ Within Target' : '⚠ Approaching Limit'}
+                      </div>
+                    </div>
+                    <div className="metric-card">
+                      <div className="metric-label">Remaining Funds</div>
+                      <div className="metric-value">${Math.abs(budgetMetrics.remaining).toFixed(2)}</div>
+                      <div className={`metric-change ${budgetMetrics.remaining >= 0 ? 'positive' : 'negative'}`}>
+                        {budgetMetrics.remaining >= 0 ? 'Available' : 'Exceeded'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="report-section">
+                <h3>Recommendations</h3>
+                <div className="analytics-description">
+                  {expenses.length === 0 ? (
+                    "No transaction data available. Begin tracking expenses to generate personalized insights."
+                  ) : budgetMetrics.percent > 100 ? (
+                    "Budget exceeded. Review discretionary spending and consider adjusting category allocations."
+                  ) : budgetMetrics.percent > 80 ? (
+                    "Approaching budget limit. Monitor spending closely and prioritize essential expenses."
+                  ) : (
+                    "Budget performance is healthy. Continue current spending patterns and consider allocating surplus to savings."
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -465,19 +560,71 @@ const Dashboard = ({ user }) => {
         {activeTab === 'about' && (
           <div className="about-tab">
             <div className="list-section">
-              <h2>About FinanceTracker</h2>
-              <p><strong>Version:</strong> 1.0.0</p>
-              <p><strong>Description:</strong> FinanceTracker is a modern expense tracking application that helps you manage your personal finances with ease.</p>
-              <h3>Features</h3>
-              <ul>
-                <li>📊 Visual expense analytics with charts</li>
-                <li>🎤 Voice-enabled expense entry</li>
-                <li>💰 Budget tracking and alerts</li>
-                <li>🔒 Secure authentication with Firebase</li>
-                <li>📱 Responsive design for all devices</li>
-              </ul>
-              <p style={{ marginTop: '1rem' }}><strong>Developer:</strong> Suyash</p>
-              <p><strong>GitHub:</strong> <a href="https://github.com/Suyash-666/finance-tracker" target="_blank" rel="noopener noreferrer">github.com/Suyash-666/finance-tracker</a></p>
+              <h2>ℹ️ About FinanceTracker</h2>
+              
+              <div className="app-info">
+                <p><strong>Application Version:</strong> 1.0.0</p>
+                <p><strong>Release Date:</strong> November 2025</p>
+                <p><strong>Developer:</strong> Suyash</p>
+                <p><strong>Platform:</strong> Web Application (React + Firebase)</p>
+              </div>
+
+              <h3>Overview</h3>
+              <p>
+                FinanceTracker is a comprehensive personal finance management platform designed to 
+                simplify expense tracking and provide actionable insights into your spending habits. 
+                Built with modern web technologies, it offers a seamless experience across all devices.
+              </p>
+
+              <h3>Core Features</h3>
+              <div className="feature-grid">
+                <div className="feature-card">
+                  <div className="feature-icon-large">📊</div>
+                  <h4>Visual Analytics</h4>
+                  <p>Interactive charts and graphs to visualize spending patterns</p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-large">🎤</div>
+                  <h4>Voice Input</h4>
+                  <p>Hands-free expense entry using voice recognition</p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-large">💰</div>
+                  <h4>Budget Tracking</h4>
+                  <p>Set limits and receive alerts when approaching thresholds</p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-large">🔒</div>
+                  <h4>Secure Storage</h4>
+                  <p>Cloud-based data protection with Firebase authentication</p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-large">📱</div>
+                  <h4>Responsive Design</h4>
+                  <p>Optimized interface for desktop, tablet, and mobile</p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-large">📈</div>
+                  <h4>Real-time Sync</h4>
+                  <p>Instant data synchronization across all your devices</p>
+                </div>
+              </div>
+
+              <h3>Technology Stack</h3>
+              <p><strong>Frontend:</strong> React 19, Vite, Chart.js</p>
+              <p><strong>Backend:</strong> Firebase (Authentication, Firestore Database)</p>
+              <p><strong>Deployment:</strong> GitHub Pages</p>
+
+              <h3>Open Source</h3>
+              <p>
+                This project is open source and available on GitHub. Contributions, issues, 
+                and feature requests are welcome!
+              </p>
+              <p>
+                <strong>Repository:</strong> <a href="https://github.com/Suyash-666/finance-tracker" target="_blank" rel="noopener noreferrer">
+                  github.com/Suyash-666/finance-tracker
+                </a>
+              </p>
             </div>
           </div>
         )}
@@ -485,24 +632,104 @@ const Dashboard = ({ user }) => {
         {activeTab === 'help' && (
           <div className="help-tab">
             <div className="list-section">
-              <h2>Help & Support</h2>
-              <h3>Getting Started</h3>
-              <p>Welcome to FinanceTracker! Here's how to use the app:</p>
-              <ol>
-                <li><strong>Add Expenses:</strong> Click "Add Expense" to record a new transaction. You can use voice input or manual entry.</li>
-                <li><strong>View Expenses:</strong> Click "All Expenses" to see your transaction history.</li>
-                <li><strong>Track Budget:</strong> Set your monthly budget and income in the Overview tab to monitor your spending.</li>
-                <li><strong>View Reports:</strong> Check the Reports tab for visual analytics and summaries.</li>
-              </ol>
-              <h3>Frequently Asked Questions</h3>
-              <p><strong>Q: How do I edit an expense?</strong></p>
-              <p>A: Go to "All Expenses" and click the edit icon next to any transaction.</p>
-              <p><strong>Q: Can I export my data?</strong></p>
-              <p>A: Data export feature is coming soon!</p>
-              <p><strong>Q: Is my data secure?</strong></p>
-              <p>A: Yes! All data is stored securely in Firebase with authentication.</p>
-              <h3>Need More Help?</h3>
-              <p>Contact support at: <a href="mailto:support@financetracker.com">support@financetracker.com</a></p>
+              <h2>❓ Help & Support Center</h2>
+
+              <div className="help-section">
+                <h3>Getting Started Guide</h3>
+                <p>Welcome to FinanceTracker! Follow these steps to begin managing your finances:</p>
+                <ol>
+                  <li>
+                    <strong>Set Your Budget:</strong> Navigate to the Overview tab and configure your 
+                    monthly income and budget limits using the input fields provided.
+                  </li>
+                  <li>
+                    <strong>Add Expenses:</strong> Click the "Add Expense" tab to record transactions. 
+                    You can enter data manually or use the voice input feature for hands-free entry.
+                  </li>
+                  <li>
+                    <strong>Review Transactions:</strong> Access "All Expenses" to view, edit, or 
+                    delete your transaction history.
+                  </li>
+                  <li>
+                    <strong>Monitor Analytics:</strong> Use the Overview and Reports tabs to visualize 
+                    your spending patterns through interactive charts.
+                  </li>
+                  <li>
+                    <strong>Track Budget:</strong> Visit the Budget tab to monitor your spending 
+                    against allocated limits and view remaining funds.
+                  </li>
+                </ol>
+              </div>
+
+              <div className="help-section">
+                <h3>Frequently Asked Questions</h3>
+                
+                <div className="faq-item">
+                  <strong>Q: How do I edit or delete an expense?</strong>
+                  <p>
+                    Navigate to "All Expenses" tab where each transaction has edit and delete icons. 
+                    Click the pencil icon to modify details or the trash icon to remove an entry.
+                  </p>
+                </div>
+
+                <div className="faq-item">
+                  <strong>Q: Can I access my data from multiple devices?</strong>
+                  <p>
+                    Yes! Your data is stored securely in the cloud via Firebase. Sign in with the same 
+                    account on any device to access your expenses, budget, and analytics in real-time.
+                  </p>
+                </div>
+
+                <div className="faq-item">
+                  <strong>Q: How does the voice input feature work?</strong>
+                  <p>
+                    Click the microphone icon on the Add Expense form and speak your expense details. 
+                    The system will automatically parse the amount, category, and description. Ensure 
+                    your browser has microphone permissions enabled.
+                  </p>
+                </div>
+
+                <div className="faq-item">
+                  <strong>Q: Is my financial data secure?</strong>
+                  <p>
+                    Absolutely! All data is encrypted and stored in Google Firebase with industry-standard 
+                    security protocols. Your information is only accessible through your authenticated account.
+                  </p>
+                </div>
+
+                <div className="faq-item">
+                  <strong>Q: Can I export my expense data?</strong>
+                  <p>
+                    Data export functionality is currently in development and will be available in a 
+                    future update. You'll be able to export to CSV and PDF formats.
+                  </p>
+                </div>
+
+                <div className="faq-item">
+                  <strong>Q: What browsers are supported?</strong>
+                  <p>
+                    FinanceTracker works on all modern browsers including Chrome, Firefox, Safari, and Edge. 
+                    For the best experience, we recommend using the latest version of Google Chrome.
+                  </p>
+                </div>
+              </div>
+
+              <div className="help-section">
+                <h3>Troubleshooting</h3>
+                <ul>
+                  <li><strong>Voice input not working:</strong> Check browser microphone permissions in settings</li>
+                  <li><strong>Data not syncing:</strong> Verify internet connection and refresh the page</li>
+                  <li><strong>Charts not displaying:</strong> Ensure you have added at least one expense</li>
+                  <li><strong>Login issues:</strong> Clear browser cache and cookies, then try again</li>
+                </ul>
+              </div>
+
+              <div className="contact-card">
+                <h3>Need Additional Support?</h3>
+                <p>Our support team is here to help you with any questions or technical issues.</p>
+                <p><strong>Email:</strong> <a href="mailto:support@financetracker.com">support@financetracker.com</a></p>
+                <p><strong>Response Time:</strong> Within 24-48 hours</p>
+              </div>
             </div>
           </div>
         )}

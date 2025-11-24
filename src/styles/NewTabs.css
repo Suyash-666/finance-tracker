@@ -1,0 +1,352 @@
+/* New Tabs Styling */
+.budget-tab,
+.reports-tab,
+.about-tab,
+.help-tab {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.list-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.list-section h2 {
+  color: #1a1a1a;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  border-bottom: 3px solid #4f46e5;
+  padding-bottom: 0.75rem;
+}
+
+.list-section h3 {
+  color: #333;
+  font-size: 1.4rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.list-section p {
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+
+.list-section ul,
+.list-section ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.list-section li {
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+}
+
+.list-section a {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.list-section a:hover {
+  color: #6366f1;
+  text-decoration: underline;
+}
+
+/* Budget Summary */
+.budget-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.summary-item {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.summary-item .label {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.summary-item .value {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.summary-item .value.negative {
+  color: #ff6b6b;
+}
+
+.summary-item .value.positive {
+  color: #51cf66;
+}
+
+/* Budget Controls */
+.budget-controls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.budget-controls button {
+  padding: 0.75rem 1.5rem;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.budget-controls button:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.budget-controls button:active {
+  transform: translateY(0);
+}
+
+/* Reports Styling */
+.report-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.report-header h2 {
+  color: white;
+  border: none;
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.report-header .report-date {
+  font-size: 1rem;
+  opacity: 0.95;
+  margin-top: 0.5rem;
+}
+
+.report-section {
+  margin-bottom: 3rem;
+}
+
+.report-section h3 {
+  color: #1a1a1a;
+  font-size: 1.6rem;
+  border-left: 4px solid #4f46e5;
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid #4f46e5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card .metric-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.metric-card .metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-top: 0.25rem;
+}
+
+.metric-card .metric-change {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.metric-card .metric-change.positive {
+  color: #51cf66;
+}
+
+.metric-card .metric-change.negative {
+  color: #ff6b6b;
+}
+
+.analytics-description {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #4f46e5;
+  margin-bottom: 2rem;
+  font-style: italic;
+  color: #555;
+}
+
+/* About Page */
+.about-tab .feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.feature-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: transform 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+}
+
+.feature-card .feature-icon-large {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card h4 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.feature-card p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.app-info {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-top: 2rem;
+}
+
+.app-info p {
+  margin: 0.5rem 0;
+}
+
+/* Help Page */
+.help-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.help-section:last-child {
+  border-bottom: none;
+}
+
+.faq-item {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #4f46e5;
+}
+
+.faq-item strong {
+  color: #1a1a1a;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.contact-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.contact-card a {
+  color: white;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.contact-card a:hover {
+  color: #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .budget-tab,
+  .reports-tab,
+  .about-tab,
+  .help-tab {
+    padding: 1rem;
+  }
+
+  .list-section {
+    padding: 1.5rem;
+  }
+
+  .list-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .budget-summary,
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-header h2 {
+    font-size: 1.8rem;
+  }
+}
