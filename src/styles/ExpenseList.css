@@ -1,7 +1,7 @@
 /* ExpenseList Component Styles - Matrix Theme */
 
 .expense-list-container {
-  background: rgba(0, 0, 0, 0.95);
+  background: #000000f2;
   border-radius: 20px;
   box-shadow: 
     0 0 40px rgba(0, 255, 0, 0.3),

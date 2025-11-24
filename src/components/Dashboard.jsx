@@ -1,5 +1,6 @@
 // src/components/Dashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
@@ -12,7 +13,19 @@ import '../styles/Dashboard.css';
 const Dashboard = ({ user }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [expenses, setExpenses] = useState([]);
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getActiveView = () => {
+    const path = location.pathname || '';
+    if (path.includes('/dashboard/add')) return 'add';
+    if (path.includes('/dashboard/list')) return 'list';
+    if (path.includes('/dashboard/profile')) return 'profile';
+    if (path.includes('/dashboard/settings')) return 'settings';
+    if (path.includes('/dashboard/budgets')) return 'budgets';
+    return 'overview';
+  };
+  const activeTab = getActiveView();
 
   // Budget state with loading indicator
   const [budget, setBudget] = useState(null);
@@ -217,6 +230,7 @@ const Dashboard = ({ user }) => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -248,24 +262,24 @@ const Dashboard = ({ user }) => {
         </div>
 
         <nav className="dashboard-nav">
-          <button
-            className={`nav-btn ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
+          <NavLink to="/dashboard" end className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
             <FaChartPie /> Overview
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'add' ? 'active' : ''}`}
-            onClick={() => setActiveTab('add')}
-          >
+          </NavLink>
+          <NavLink to="/dashboard/add" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
             <FaPlus /> Add Expense
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'list' ? 'active' : ''}`}
-            onClick={() => setActiveTab('list')}
-          >
+          </NavLink>
+          <NavLink to="/dashboard/list" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
             <FaList /> All Expenses
-          </button>
+          </NavLink>
+          <NavLink to="/dashboard/profile" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
+            <FaUser /> Profile
+          </NavLink>
+          <NavLink to="/dashboard/settings" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
+            ⚙️ Settings
+          </NavLink>
+          <NavLink to="/dashboard/budgets" className={({ isActive }) => `nav-btn ${isActive ? 'active' : ''}`}>
+            🧭 Budgets
+          </NavLink>
         </nav>
 
         <div className="user-info">
@@ -387,6 +401,37 @@ const Dashboard = ({ user }) => {
           <div className="list-tab">
             <div className="list-section">
               <ExpenseList refreshTrigger={refreshTrigger} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'profile' && (
+          <div className="profile-tab">
+            <div className="list-section">
+              <h2>Profile</h2>
+              <div className="user-avatar" style={{ marginBottom: 16 }}>
+                <img src={getUserAvatar()} alt="User Avatar" />
+              </div>
+              <p><strong>Name:</strong> {getUserDisplayName()}</p>
+              <p><strong>Email:</strong> {user.email}</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="settings-tab">
+            <div className="list-section">
+              <h2>Settings</h2>
+              <p>Coming soon: theme, currency, and notification settings.</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'budgets' && (
+          <div className="budgets-tab">
+            <div className="list-section">
+              <h2>Budgets</h2>
+              <p>Use Budget & Income in Overview to configure. More advanced budget planning coming soon.</p>
             </div>
           </div>
         )}

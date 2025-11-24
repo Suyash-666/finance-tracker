@@ -1,17 +1,21 @@
 // src/components/Auth.jsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebase';
 import { FaGoogle, FaEye, FaEyeSlash, FaChartLine } from 'react-icons/fa';
 import '../styles/Auth.css';
 
-const Auth = () => {
+const Auth = ({ defaultMode = 'login' }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(defaultMode === 'login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    setIsLogin(defaultMode === 'login');
+  }, [defaultMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
