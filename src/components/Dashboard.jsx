@@ -291,6 +291,12 @@ const Dashboard = ({ user }) => {
           >
             ❓ Help
           </button>
+          <button
+            className={`nav-btn ${activeTab === 'feedback' ? 'active' : ''}`}
+            onClick={() => setActiveTab('feedback')}
+          >
+            💬 Feedback
+          </button>
         </nav>
 
         <div className="user-info">
@@ -317,75 +323,59 @@ const Dashboard = ({ user }) => {
               </div>
             )}
 
-            {/* Budget Configuration */}
-            <div className="budget-section">
-              <h3>Budget & Income Settings</h3>
-              <div className="budget-inputs">
-                <div className="input-group">
-                  <label htmlFor="income">Monthly Income ($)</label>
-                  <input
-                    id="income"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={incomeInput}
-                    onChange={(e) => setIncomeInput(e.target.value)}
-                    placeholder="Enter monthly income"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className="input-group">
-                  <label htmlFor="budget">Monthly Budget ($)</label>
-                  <input
-                    id="budget"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={budgetInput}
-                    onChange={(e) => setBudgetInput(e.target.value)}
-                    placeholder="Enter budget limit"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={handleBudgetSave}
-                className="save-budget-btn"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Loading...' : 'Save Budget & Income'}
-              </button>
-
-              {saveError && <p className="error-message">{saveError}</p>}
-
-              {/* Budget Summary */}
-              {budget !== null && budget > 0 && (
+            {/* Budget Summary - Read Only */}
+            {budget !== null && budget > 0 ? (
+              <div className="overview-summary">
+                <h3>📊 Budget Overview</h3>
                 <div className="budget-summary">
                   <div className="summary-item">
-                    <span className="label">Total Spent:</span>
+                    <span className="label">Total Spent</span>
                     <span className="value">${totalSpent.toFixed(2)}</span>
                   </div>
                   <div className="summary-item">
-                    <span className="label">Budget:</span>
+                    <span className="label">Monthly Budget</span>
                     <span className="value">${budget.toFixed(2)}</span>
                   </div>
                   <div className="summary-item">
-                    <span className="label">Remaining:</span>
+                    <span className="label">Remaining</span>
                     <span className={`value ${budgetMetrics.remaining < 0 ? 'negative' : 'positive'}`}>
-                      ${budgetMetrics.remaining.toFixed(2)}
+                      ${Math.abs(budgetMetrics.remaining).toFixed(2)}
                     </span>
                   </div>
                   {income > 0 && (
-                    <div className="summary-item">
-                      <span className="label">Savings:</span>
-                      <span className="value">${budgetMetrics.savings.toFixed(2)} ({budgetMetrics.savingsPercent.toFixed(1)}%)</span>
-                    </div>
+                    <>
+                      <div className="summary-item">
+                        <span className="label">Monthly Income</span>
+                        <span className="value">${income.toFixed(2)}</span>
+                      </div>
+                      <div className="summary-item">
+                        <span className="label">Savings</span>
+                        <span className="value">${budgetMetrics.savings.toFixed(2)}</span>
+                      </div>
+                      <div className="summary-item">
+                        <span className="label">Savings Rate</span>
+                        <span className="value">{budgetMetrics.savingsPercent.toFixed(1)}%</span>
+                      </div>
+                    </>  
                   )}
                 </div>
-              )}
-            </div>
+                <div className="budget-controls">
+                  <button onClick={() => setActiveTab('budget')}>
+                    ⚙️ Configure Budget & Income
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="overview-summary">
+                <h3>⚠️ Budget Not Set</h3>
+                <p>Set your monthly budget and income to start tracking your finances effectively.</p>
+                <div className="budget-controls">
+                  <button onClick={() => setActiveTab('budget')}>
+                    ⚙️ Set Budget & Income
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Investment Tips */}
             <div className={`investment-tips ${investmentTip.type}`}>
@@ -393,9 +383,27 @@ const Dashboard = ({ user }) => {
               <p>{investmentTip.message}</p>
             </div>
 
-            {/* Charts */}
-            <div className="charts-section">
-              <ExpenseCharts expenses={expenses} />
+            {/* Quick Stats */}
+            <div className="quick-stats">
+              <h3>📈 Quick Stats</h3>
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <div className="stat-label">Total Transactions</div>
+                  <div className="stat-value">{expenses.length}</div>
+                </div>
+                {expenses.length > 0 && (
+                  <>
+                    <div className="stat-card">
+                      <div className="stat-label">Average Transaction</div>
+                      <div className="stat-value">${(totalSpent / expenses.length).toFixed(2)}</div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-label">Largest Expense</div>
+                      <div className="stat-value">${Math.max(...expenses.map(e => parseFloat(e.amount || 0))).toFixed(2)}</div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </>
         )}
@@ -422,6 +430,52 @@ const Dashboard = ({ user }) => {
               <h2>💰 Budget Management</h2>
               <p>Monitor and manage your monthly budget allocations. Track your spending against set limits to maintain financial discipline.</p>
               
+              {/* Budget Configuration Form */}
+              <div className="budget-config">
+                <h3>⚙️ Configure Budget & Income</h3>
+                <div className="budget-inputs">
+                  <div className="input-group">
+                    <label htmlFor="income">Monthly Income ($)</label>
+                    <input
+                      id="income"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={incomeInput}
+                      onChange={(e) => setIncomeInput(e.target.value)}
+                      placeholder="Enter monthly income"
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label htmlFor="budget">Monthly Budget ($)</label>
+                    <input
+                      id="budget"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={budgetInput}
+                      onChange={(e) => setBudgetInput(e.target.value)}
+                      placeholder="Enter budget limit"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleBudgetSave}
+                  className="save-budget-btn"
+                  disabled={isLoading}
+                  style={{ marginTop: '1rem' }}
+                >
+                  {isLoading ? 'Loading...' : '💾 Save Budget & Income'}
+                </button>
+
+                {saveError && <p className="error-message" style={{ marginTop: '1rem', color: '#ff6b6b' }}>{saveError}</p>}
+              </div>
+
+              {/* Budget Summary */}
               <div className="budget-summary">
                 <div className="summary-item">
                   <span className="label">Monthly Budget</span>
@@ -445,12 +499,6 @@ const Dashboard = ({ user }) => {
                     </div>
                   </>
                 )}
-              </div>
-
-              <div className="budget-controls">
-                <button onClick={() => setActiveTab('overview')}>
-                  ⚙️ Configure Budget
-                </button>
               </div>
             </div>
           </div>
@@ -730,6 +778,165 @@ const Dashboard = ({ user }) => {
                 <p><strong>Email:</strong> <a href="mailto:support@financetracker.com">support@financetracker.com</a></p>
                 <p><strong>Response Time:</strong> Within 24-48 hours</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'feedback' && (
+          <div className="feedback-tab">
+            <div className="list-section">
+              <div className="report-header">
+                <h2>💬 Your Personalized Financial Feedback</h2>
+                <div className="report-date">Generated on {new Date().toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}</div>
+              </div>
+
+              {expenses.length === 0 ? (
+                <div className="feedback-empty">
+                  <h3>📊 Start Tracking to Get Insights</h3>
+                  <p>Add your first expense to receive personalized feedback and recommendations!</p>
+                  <div className="budget-controls">
+                    <button onClick={() => setActiveTab('add')}>➕ Add Your First Expense</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="report-section">
+                    <h3>🎯 Overall Performance</h3>
+                    <div className="feedback-card">
+                      {budgetMetrics.percent <= 50 ? (
+                        <>
+                          <div className="feedback-icon">🌟</div>
+                          <h4>Excellent Financial Discipline!</h4>
+                          <p>
+                            You've spent only {budgetMetrics.percent.toFixed(1)}% of your budget. 
+                            This demonstrates strong self-control and effective expense management. 
+                            Keep up this outstanding performance!
+                          </p>
+                        </>
+                      ) : budgetMetrics.percent <= 80 ? (
+                        <>
+                          <div className="feedback-icon">✅</div>
+                          <h4>Good Budget Management</h4>
+                          <p>
+                            You're at {budgetMetrics.percent.toFixed(1)}% of your budget allocation. 
+                            You're on the right track! Continue monitoring your expenses to maintain 
+                            this healthy spending pattern.
+                          </p>
+                        </>
+                      ) : budgetMetrics.percent < 100 ? (
+                        <>
+                          <div className="feedback-icon">⚠️</div>
+                          <h4>Approaching Budget Limit</h4>
+                          <p>
+                            You've used {budgetMetrics.percent.toFixed(1)}% of your budget. 
+                            Consider slowing down discretionary spending and focus on essential 
+                            purchases for the remainder of the month.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="feedback-icon">🚨</div>
+                          <h4>Budget Exceeded - Action Required</h4>
+                          <p>
+                            You've exceeded your budget by ${Math.abs(budgetMetrics.remaining).toFixed(2)}. 
+                            Review your recent expenses and identify areas where you can reduce spending. 
+                            Consider adjusting your budget if current limits are unrealistic.
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="report-section">
+                    <h3>💡 Smart Recommendations</h3>
+                    <div className="recommendations-grid">
+                      {budgetMetrics.savingsPercent >= 20 && income > 0 && (
+                        <div className="recommendation-card positive">
+                          <div className="rec-icon">💰</div>
+                          <h4>Strong Savings Habit</h4>
+                          <p>
+                            You're saving {budgetMetrics.savingsPercent.toFixed(1)}% of your income. 
+                            Consider investing this surplus in index funds or high-yield savings accounts 
+                            for long-term wealth building.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {expenses.length >= 5 && (
+                        <div className="recommendation-card info">
+                          <div className="rec-icon">📊</div>
+                          <h4>Track Spending Patterns</h4>
+                          <p>
+                            With {expenses.length} transactions recorded, you now have enough data for 
+                            meaningful insights. Check the Reports tab to identify your top spending categories.
+                          </p>
+                        </div>
+                      )}
+
+                      {(totalSpent / expenses.length) > 50 && expenses.length >= 3 && (
+                        <div className="recommendation-card warning">
+                          <div className="rec-icon">💳</div>
+                          <h4>High Average Transaction</h4>
+                          <p>
+                            Your average transaction is ${(totalSpent / expenses.length).toFixed(2)}. 
+                            Consider breaking down larger purchases or reviewing if these expenses align 
+                            with your financial goals.
+                          </p>
+                        </div>
+                      )}
+
+                      {budgetMetrics.remaining > 0 && budgetMetrics.percent < 70 && budget > 0 && (
+                        <div className="recommendation-card positive">
+                          <div className="rec-icon">🎉</div>
+                          <h4>Budget Cushion Available</h4>
+                          <p>
+                            You have ${budgetMetrics.remaining.toFixed(2)} remaining in your budget. 
+                            This gives you flexibility for planned purchases or unexpected expenses.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="report-section">
+                    <h3>📈 Progress Insights</h3>
+                    <div className="analytics-description">
+                      <p><strong>Transaction Volume:</strong> You've logged {expenses.length} expense{expenses.length !== 1 ? 's' : ''} so far.</p>
+                      <p><strong>Spending Consistency:</strong> Average transaction value is ${(totalSpent / expenses.length).toFixed(2)}.</p>
+                      {income > 0 && (
+                        <p><strong>Income Utilization:</strong> You've spent {((totalSpent / income) * 100).toFixed(1)}% of your monthly income.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="report-section">
+                    <h3>🎯 Next Steps</h3>
+                    <div className="next-steps">
+                      <ul>
+                        {budgetMetrics.percent > 80 && budget > 0 && (
+                          <li>Review non-essential expenses and identify cutback opportunities</li>
+                        )}
+                        {!income || income === 0 && (
+                          <li>Set your monthly income in the Budget tab for better savings tracking</li>
+                        )}
+                        {expenses.length < 10 && (
+                          <li>Continue tracking all expenses for more accurate financial insights</li>
+                        )}
+                        {budgetMetrics.savingsPercent < 10 && income > 0 && (
+                          <li>Aim to increase your savings rate to at least 20% of income</li>
+                        )}
+                        <li>Review the Reports tab weekly to stay aware of spending trends</li>
+                        <li>Set specific financial goals (emergency fund, investment targets, etc.)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
