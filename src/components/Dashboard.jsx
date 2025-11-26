@@ -258,6 +258,12 @@ const Dashboard = ({ user }) => {
           </button>
         </div>
         <nav className="sidebar-nav">
+          <button onClick={() => { setActiveTab('budget'); setSidebarOpen(false); }} className="sidebar-link">
+            <FaChartLine /> Budget
+          </button>
+          <button onClick={() => { setActiveTab('reports'); setSidebarOpen(false); }} className="sidebar-link">
+            <FaChartPie /> Charts
+          </button>
           <button onClick={() => navigate('/reports')} className="sidebar-link">
             <FaFileAlt /> Reports
           </button>
@@ -309,37 +315,7 @@ const Dashboard = ({ user }) => {
             className={`nav-btn ${activeTab === 'list' ? 'active' : ''}`}
             onClick={() => setActiveTab('list')}
           >
-            <FaList /> All Expenses
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'budget' ? 'active' : ''}`}
-            onClick={() => setActiveTab('budget')}
-          >
-            💰 Budget
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reports')}
-          >
-            📊 Reports
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'about' ? 'active' : ''}`}
-            onClick={() => setActiveTab('about')}
-          >
-            ℹ️ About
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'help' ? 'active' : ''}`}
-            onClick={() => setActiveTab('help')}
-          >
-            ❓ Help
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'feedback' ? 'active' : ''}`}
-            onClick={() => setActiveTab('feedback')}
-          >
-            💬 Feedback
+            <FaList /> Expense List
           </button>
         </nav>
 
