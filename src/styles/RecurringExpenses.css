@@ -1,0 +1,14 @@
+/* Recurring Expenses Table */
+.recurring-table-container {
+  background: rgba(0, 8, 20, 0.9);
+  border-radius: 12px;
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  overflow-x: auto;
+}
+
+.recurring-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.table-header { background: rgba(0, 20, 40, 0.8); }
+.table-header th { padding: 1rem; color: #00f0ff; text-align: left; font-weight: bold; text-transform: uppercase; }
+.table-body tr { border-bottom: 1px solid rgba(0, 240, 255, 0.1); transition: all 0.3s; }
+.table-body tr:hover { background: rgba(0, 240, 255, 0.05); }
+.table-body td { padding: 1rem; color: rgba(0, 240, 255, 0.9); }
