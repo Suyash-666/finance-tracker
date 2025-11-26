@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
-import { FaChartLine, FaUser, FaSignOutAlt, FaPlus, FaList, FaChartPie, FaBars, FaTimes, FaFileAlt, FaQuestionCircle, FaCommentDots, FaLightbulb } from 'react-icons/fa';
+import { FaChartLine, FaUser, FaSignOutAlt, FaPlus, FaList, FaChartPie, FaBars, FaTimes, FaFileAlt, FaQuestionCircle, FaCommentDots, FaLightbulb, FaCreditCard, FaRedoAlt, FaWallet } from 'react-icons/fa';
 import '../styles/Dashboard.css';
 import '../styles/NewTabs.css';
 
@@ -266,6 +266,15 @@ const Dashboard = ({ user }) => {
           </button>
           <button onClick={() => navigate('/reports')} className="sidebar-link">
             <FaFileAlt /> Reports
+          </button>
+          <button onClick={() => navigate('/debt-tracker')} className="sidebar-link">
+            <FaCreditCard /> Debt Tracker
+          </button>
+          <button onClick={() => navigate('/recurring-expenses')} className="sidebar-link">
+            <FaRedoAlt /> Recurring Expenses
+          </button>
+          <button onClick={() => navigate('/income-sources')} className="sidebar-link">
+            <FaWallet /> Income Sources
           </button>
           <button onClick={() => navigate('/investment-tips')} className="sidebar-link">
             <FaLightbulb /> Investment Tips

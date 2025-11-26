@@ -11,6 +11,9 @@ import InvestmentTips from './components/InvestmentTips';
 import Help from './components/Help';
 import Feedback from './components/Feedback';
 import Reports from './components/Reports';
+import DebtTracker from './components/DebtTracker';
+import RecurringExpenses from './components/RecurringExpenses';
+import IncomeSources from './components/IncomeSources';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -60,6 +63,9 @@ function App() {
           <Route path="/help" element={user ? <Help /> : <Navigate to="/auth" />} />
           <Route path="/feedback" element={user ? <Feedback /> : <Navigate to="/auth" />} />
           <Route path="/reports" element={user ? <Reports /> : <Navigate to="/auth" />} />
+          <Route path="/debt-tracker" element={user ? <DebtTracker /> : <Navigate to="/auth" />} />
+          <Route path="/recurring-expenses" element={user ? <RecurringExpenses /> : <Navigate to="/auth" />} />
+          <Route path="/income-sources" element={user ? <IncomeSources /> : <Navigate to="/auth" />} />
         </Routes>
       </div>
     </Router>
