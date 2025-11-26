@@ -5,7 +5,7 @@ import { db, auth } from '../services/firebase';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaDollarSign, FaTrash, FaChartLine } from 'react-icons/fa';
-import '../styles/FinancialPages.css';
+import '../styles/IncomeSources.css';
 
 const IncomeSources = () => {
   const navigate = useNavigate();

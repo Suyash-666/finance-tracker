@@ -5,7 +5,7 @@ import { db, auth } from '../services/firebase';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaCreditCard, FaTrash, FaDollarSign } from 'react-icons/fa';
-import '../styles/FinancialPages.css';
+import '../styles/DebtTracker.css';
 
 const DebtTracker = () => {
   const navigate = useNavigate();
