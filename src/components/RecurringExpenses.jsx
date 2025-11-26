@@ -5,7 +5,7 @@ import { db, auth } from '../services/firebase';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaCalendar, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
-import '../styles/ModernClean.css';
+import '../styles/RecurringExpenses.css';
 
 const RecurringExpenses = () => {
   const navigate = useNavigate();

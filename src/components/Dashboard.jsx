@@ -9,7 +9,7 @@ import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
 import { FaChartLine, FaUser, FaSignOutAlt, FaPlus, FaList, FaChartPie, FaBars, FaTimes, FaFileAlt, FaQuestionCircle, FaCommentDots, FaLightbulb, FaCreditCard, FaRedoAlt, FaWallet } from 'react-icons/fa';
-import '../styles/ModernClean.css';
+import '../styles/Dashboard.css';
 
 const Dashboard = ({ user }) => {
   const navigate = useNavigate();

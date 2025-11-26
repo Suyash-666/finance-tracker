@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement } from 'chart.js';
 import { Pie, Bar, Line } from 'react-chartjs-2';
 import { FaChartPie, FaChartBar, FaChartLine, FaCalendarAlt } from 'react-icons/fa';
-import '../styles/ModernClean.css';
+import '../styles/ExpenseCharts.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement);
 

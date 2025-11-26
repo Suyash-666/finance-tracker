@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { auth } from '../services/firebase';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaCalendar, FaShieldAlt, FaArrowLeft } from 'react-icons/fa';
-import '../styles/ModernClean.css';
+import '../styles/UserInfo.css';
 
 const UserInfo = () => {
   const navigate = useNavigate();

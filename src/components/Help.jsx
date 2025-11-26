@@ -1,7 +1,7 @@
 // src/components/Help.jsx
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaQuestionCircle, FaMicrophone, FaChartBar, FaPiggyBank } from 'react-icons/fa';
-import '../styles/ModernClean.css';
+import '../styles/Help.css';
 
 const Help = () => {
   const navigate = useNavigate();
