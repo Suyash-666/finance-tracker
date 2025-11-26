@@ -5,7 +5,7 @@ import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'fireb
 import { auth, db } from '../services/firebase';
 import { toast } from 'react-toastify';
 import { FaArrowLeft } from 'react-icons/fa';
-import '../styles/Budget.css';
+import '../styles/ModernClean.css';
 
 const Budget = () => {
   const navigate = useNavigate();

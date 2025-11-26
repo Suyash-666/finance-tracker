@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import { toast } from 'react-toastify';
-import '../styles/ExpenseList.css';
+import '../styles/ModernClean.css';
 
 const ExpenseList = ({ refreshTrigger }) => {
   const [expenses, setExpenses] = useState([]);

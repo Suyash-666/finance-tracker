@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaStar } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import '../styles/Feedback.css';
+import '../styles/ModernClean.css';
 
 const Feedback = () => {
   const navigate = useNavigate();

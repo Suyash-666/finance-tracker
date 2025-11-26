@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaChartLine, FaPiggyBank, FaUniversity, FaCoins } from 'react-icons/fa';
-import '../styles/InvestmentTips.css';
+import '../styles/ModernClean.css';
 
 const InvestmentTips = () => {
   const navigate = useNavigate();

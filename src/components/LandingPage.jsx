@@ -1,7 +1,7 @@
 // src/components/LandingPage.jsx
 import { useNavigate } from 'react-router-dom';
 import { FaChartLine, FaRocket, FaShieldAlt, FaMobileAlt } from 'react-icons/fa';
-import '../styles/LandingPage.css';
+import '../styles/ModernClean.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();

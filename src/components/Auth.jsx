@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithP
 import { auth, googleProvider } from '../services/firebase';
 import { FaGoogle, FaEye, FaEyeSlash, FaChartLine } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import '../styles/Auth.css';
+import '../styles/ModernClean.css';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();

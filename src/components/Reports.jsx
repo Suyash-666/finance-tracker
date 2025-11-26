@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import { FaArrowLeft, FaCalendar, FaChartLine, FaMoneyBillWave } from 'react-icons/fa';
-import '../styles/Reports.css';
+import '../styles/ModernClean.css';
 
 const Reports = () => {
   const navigate = useNavigate();

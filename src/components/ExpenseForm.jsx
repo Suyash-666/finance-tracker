@@ -4,7 +4,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import speechRecognition from '../services/speechRecognition';
 import { toast } from 'react-toastify';
-import '../styles/ExpenseForm.css';
+import '../styles/ModernClean.css';
 
 const ExpenseForm = ({ onExpenseAdded }) => {
   const [amount, setAmount] = useState('');
