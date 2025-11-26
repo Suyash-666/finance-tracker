@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import { toast } from 'react-toastify';
 import ExpenseForm from './ExpenseForm';
@@ -10,7 +10,6 @@ import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
 import { FaChartLine, FaUser, FaSignOutAlt, FaPlus, FaList, FaChartPie, FaBars, FaTimes, FaFileAlt, FaQuestionCircle, FaCommentDots, FaLightbulb, FaCreditCard, FaRedoAlt, FaWallet } from 'react-icons/fa';
 import '../styles/Dashboard.css';
-import '../styles/NewTabs.css';
 
 const Dashboard = ({ user }) => {
   const navigate = useNavigate();
@@ -22,10 +21,6 @@ const Dashboard = ({ user }) => {
   // Budget state with loading indicator
   const [budget, setBudget] = useState(null);
   const [income, setIncome] = useState(null);
-  const [budgetInput, setBudgetInput] = useState('');
-  const [incomeInput, setIncomeInput] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -59,8 +54,6 @@ const Dashboard = ({ user }) => {
           
           setBudget(budgetAmount);
           setIncome(incomeAmount);
-          setBudgetInput(budgetAmount.toString());
-          setIncomeInput(incomeAmount.toString());
         } else {
           setBudget(0);
           setIncome(0);
@@ -69,8 +62,6 @@ const Dashboard = ({ user }) => {
         console.error('Error loading budget:', error);
         setBudget(0);
         setIncome(0);
-      } finally {
-        setIsLoading(false);
       }
     };
     
@@ -178,50 +169,6 @@ const Dashboard = ({ user }) => {
     }
   }, [income, budgetMetrics]);
 
-  // Save budget with validation and error handling
-  const handleBudgetSave = async () => {
-    setSaveError('');
-    
-    const budgetValue = parseFloat(budgetInput);
-    const incomeValue = parseFloat(incomeInput);
-
-    // Validation
-    if (isNaN(budgetValue) || budgetValue < 0) {
-      toast.error('Please enter a valid budget amount');
-      setSaveError('Please enter a valid budget amount');
-      return;
-    }
-
-    if (isNaN(incomeValue) || incomeValue < 0) {
-      toast.error('Please enter a valid income amount');
-      setSaveError('Please enter a valid income amount');
-      return;
-    }
-
-    if (budgetValue > incomeValue && incomeValue > 0) {
-      const confirm = window.confirm(
-        'Your budget exceeds your income. Are you sure you want to continue?'
-      );
-      if (!confirm) return;
-    }
-
-    try {
-      await setDoc(doc(db, 'budgets', auth.currentUser.uid), {
-        amount: budgetValue,
-        income: incomeValue,
-        updatedAt: new Date().toISOString()
-      });
-      
-      setBudget(budgetValue);
-      setIncome(incomeValue);
-      toast.success('Budget and income saved successfully!');
-    } catch (error) {
-      console.error('Error saving budget:', error);
-      toast.error('Failed to save budget. Please try again.');
-      setSaveError('Failed to save budget. Please try again.');
-    }
-  };
-
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -258,7 +205,7 @@ const Dashboard = ({ user }) => {
           </button>
         </div>
         <nav className="sidebar-nav">
-          <button onClick={() => { setActiveTab('budget'); setSidebarOpen(false); }} className="sidebar-link">
+          <button onClick={() => navigate('/budget')} className="sidebar-link">
             <FaChartLine /> Budget
           </button>
           <button onClick={() => { setActiveTab('reports'); setSidebarOpen(false); }} className="sidebar-link">
@@ -389,7 +336,7 @@ const Dashboard = ({ user }) => {
                   )}
                 </div>
                 <div className="budget-controls">
-                  <button onClick={() => setActiveTab('budget')}>
+                  <button onClick={() => navigate('/budget')}>
                     ⚙️ Configure Budget & Income
                   </button>
                 </div>
@@ -399,7 +346,7 @@ const Dashboard = ({ user }) => {
                 <h3>⚠️ Budget Not Set</h3>
                 <p>Set your monthly budget and income to start tracking your finances effectively.</p>
                 <div className="budget-controls">
-                  <button onClick={() => setActiveTab('budget')}>
+                  <button onClick={() => navigate('/budget')}>
                     ⚙️ Set Budget & Income
                   </button>
                 </div>
@@ -449,86 +396,6 @@ const Dashboard = ({ user }) => {
           <div className="list-tab">
             <div className="list-section">
               <ExpenseList refreshTrigger={refreshTrigger} />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'budget' && (
-          <div className="budget-tab">
-            <div className="list-section">
-              <h2>💰 Budget Management</h2>
-              <p>Monitor and manage your monthly budget allocations. Track your spending against set limits to maintain financial discipline.</p>
-              
-              {/* Budget Configuration Form */}
-              <div className="budget-config">
-                <h3>⚙️ Configure Budget & Income</h3>
-                <div className="budget-inputs">
-                  <div className="input-group">
-                    <label htmlFor="income">Monthly Income ($)</label>
-                    <input
-                      id="income"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={incomeInput}
-                      onChange={(e) => setIncomeInput(e.target.value)}
-                      placeholder="Enter monthly income"
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  <div className="input-group">
-                    <label htmlFor="budget">Monthly Budget ($)</label>
-                    <input
-                      id="budget"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={budgetInput}
-                      onChange={(e) => setBudgetInput(e.target.value)}
-                      placeholder="Enter budget limit"
-                      disabled={isLoading}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleBudgetSave}
-                  className="save-budget-btn"
-                  disabled={isLoading}
-                  style={{ marginTop: '1rem' }}
-                >
-                  {isLoading ? 'Loading...' : '💾 Save Budget & Income'}
-                </button>
-
-                {saveError && <p className="error-message" style={{ marginTop: '1rem', color: '#ff6b6b' }}>{saveError}</p>}
-              </div>
-
-              {/* Budget Summary */}
-              <div className="budget-summary">
-                <div className="summary-item">
-                  <span className="label">Monthly Budget</span>
-                  <span className="value">${budget !== null ? budget.toFixed(2) : '0.00'}</span>
-                </div>
-                <div className="summary-item">
-                  <span className="label">Total Spent</span>
-                  <span className="value">${totalSpent.toFixed(2)}</span>
-                </div>
-                {budget !== null && budget > 0 && (
-                  <>
-                    <div className="summary-item">
-                      <span className="label">Remaining Budget</span>
-                      <span className={`value ${budgetMetrics.remaining < 0 ? 'negative' : 'positive'}`}>
-                        ${Math.abs(budgetMetrics.remaining).toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="summary-item">
-                      <span className="label">Budget Usage</span>
-                      <span className="value">{budgetMetrics.percent.toFixed(1)}%</span>
-                    </div>
-                  </>
-                )}
-              </div>
             </div>
           </div>
         )}

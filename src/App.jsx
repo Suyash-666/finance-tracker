@@ -14,6 +14,7 @@ import Reports from './components/Reports';
 import DebtTracker from './components/DebtTracker';
 import RecurringExpenses from './components/RecurringExpenses';
 import IncomeSources from './components/IncomeSources';
+import Budget from './components/Budget';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -66,6 +67,7 @@ function App() {
           <Route path="/debt-tracker" element={user ? <DebtTracker /> : <Navigate to="/auth" />} />
           <Route path="/recurring-expenses" element={user ? <RecurringExpenses /> : <Navigate to="/auth" />} />
           <Route path="/income-sources" element={user ? <IncomeSources /> : <Navigate to="/auth" />} />
+          <Route path="/budget" element={user ? <Budget /> : <Navigate to="/auth" />} />
         </Routes>
       </div>
     </Router>
