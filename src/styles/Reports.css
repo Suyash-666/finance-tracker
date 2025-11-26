@@ -1,0 +1,210 @@
+/* src/styles/Reports.css - Cyber Space Theme */
+.reports-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #000814 0%, #001d3d 50%, #000814 100%);
+  padding: 2rem;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.reports-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.range-btn {
+  background: rgba(0, 20, 40, 0.5);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  color: #00f0ff;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.range-btn:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 5px 20px rgba(0, 240, 255, 0.3);
+}
+
+.range-btn.active {
+  background: linear-gradient(135deg, #00f0ff 0%, #bd00ff 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 5px 25px rgba(0, 240, 255, 0.5);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: rgba(0, 8, 20, 0.85);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 10px 40px rgba(0, 240, 255, 0.3);
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 3rem;
+  color: #00f0ff;
+  filter: drop-shadow(0 0 15px #00f0ff);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-content label {
+  display: block;
+  font-size: 0.9rem;
+  color: rgba(0, 240, 255, 0.7);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  color: white;
+  margin: 0;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.stat-value.category-name {
+  font-size: 1.3rem;
+  color: #00f0ff;
+}
+
+.category-breakdown {
+  background: rgba(0, 8, 20, 0.85);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 16px;
+  padding: 2.5rem;
+}
+
+.category-breakdown h3 {
+  color: #00f0ff;
+  font-size: 1.8rem;
+  margin: 0 0 2rem 0;
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+.no-data {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+  padding: 2rem;
+}
+
+.breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.breakdown-item {
+  background: rgba(0, 20, 40, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.breakdown-item:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 5px 20px rgba(0, 240, 255, 0.2);
+}
+
+.breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.category-label {
+  color: #00f0ff;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.category-amount {
+  color: white;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.progress-bar {
+  background: rgba(0, 20, 40, 0.8);
+  border-radius: 10px;
+  height: 12px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f0ff 0%, #bd00ff 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+.percentage {
+  color: rgba(0, 240, 255, 0.8);
+  font-size: 0.9rem;
+  float: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reports-page {
+    padding: 1rem;
+  }
+
+  .time-range-selector {
+    flex-direction: column;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .category-breakdown {
+    padding: 1.5rem;
+  }
+}

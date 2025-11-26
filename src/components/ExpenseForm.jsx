@@ -113,10 +113,6 @@ const ExpenseForm = ({ onExpenseAdded }) => {
       }
     );
   };
-        setIsListening(false);
-      }
-    );
-  };
 
   const stopVoiceInput = () => {
     speechRecognition.stopListening();

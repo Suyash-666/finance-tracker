@@ -1,5 +1,6 @@
 // src/components/Dashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
@@ -7,13 +8,15 @@ import { toast } from 'react-toastify';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
-import { FaChartLine, FaUser, FaSignOutAlt, FaPlus, FaList, FaChartPie } from 'react-icons/fa';
+import { FaChartLine, FaUser, FaSignOutAlt, FaPlus, FaList, FaChartPie, FaBars, FaTimes, FaFileAlt, FaQuestionCircle, FaCommentDots, FaLightbulb } from 'react-icons/fa';
 import '../styles/Dashboard.css';
 import '../styles/NewTabs.css';
 
 const Dashboard = ({ user }) => {
+  const navigate = useNavigate();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [expenses, setExpenses] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
   // Budget state with loading indicator
@@ -246,8 +249,43 @@ const Dashboard = ({ user }) => {
 
   return (
     <div className="dashboard-container">
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <h3>Menu</h3>
+          <button className="close-sidebar" onClick={() => setSidebarOpen(false)}>
+            <FaTimes />
+          </button>
+        </div>
+        <nav className="sidebar-nav">
+          <button onClick={() => navigate('/reports')} className="sidebar-link">
+            <FaFileAlt /> Reports
+          </button>
+          <button onClick={() => navigate('/investment-tips')} className="sidebar-link">
+            <FaLightbulb /> Investment Tips
+          </button>
+          <button onClick={() => navigate('/help')} className="sidebar-link">
+            <FaQuestionCircle /> Help
+          </button>
+          <button onClick={() => navigate('/feedback')} className="sidebar-link">
+            <FaCommentDots /> Feedback
+          </button>
+          <button onClick={() => navigate('/user-info')} className="sidebar-link">
+            <FaUser /> User Info
+          </button>
+        </nav>
+      </div>
+
+      {/* Sidebar Overlay */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>
+      )}
+
       <header className="dashboard-header">
         <div className="header-left">
+          <button className="menu-toggle" onClick={() => setSidebarOpen(true)}>
+            <FaBars />
+          </button>
           <div className="logo">
             <FaChartLine className="logo-icon" />
             <h1>FinanceTracker</h1>
