@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
+import { toast } from 'react-toastify';
 import '../styles/ExpenseList.css';
 
 const ExpenseList = ({ refreshTrigger }) => {
@@ -48,9 +49,10 @@ const ExpenseList = ({ refreshTrigger }) => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
       try {
         await deleteDoc(doc(db, 'expenses', id));
+        toast.success('Expense deleted successfully!');
       } catch (error) {
         console.error('Error deleting expense:', error);
-        alert('Error deleting expense');
+        toast.error('Error deleting expense');
       }
     }
   };

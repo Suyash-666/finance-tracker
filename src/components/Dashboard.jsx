@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
+import { toast } from 'react-toastify';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import ExpenseCharts from './ExpenseCharts';
@@ -183,11 +184,13 @@ const Dashboard = ({ user }) => {
 
     // Validation
     if (isNaN(budgetValue) || budgetValue < 0) {
+      toast.error('Please enter a valid budget amount');
       setSaveError('Please enter a valid budget amount');
       return;
     }
 
     if (isNaN(incomeValue) || incomeValue < 0) {
+      toast.error('Please enter a valid income amount');
       setSaveError('Please enter a valid income amount');
       return;
     }
@@ -208,9 +211,10 @@ const Dashboard = ({ user }) => {
       
       setBudget(budgetValue);
       setIncome(incomeValue);
-      alert('Budget and income saved successfully!');
+      toast.success('Budget and income saved successfully!');
     } catch (error) {
       console.error('Error saving budget:', error);
+      toast.error('Failed to save budget. Please try again.');
       setSaveError('Failed to save budget. Please try again.');
     }
   };
@@ -218,8 +222,10 @@ const Dashboard = ({ user }) => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      toast.success('Signed out successfully!');
     } catch (error) {
       console.error('Error signing out:', error);
+      toast.error('Error signing out');
     }
   };
 

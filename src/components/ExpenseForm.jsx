@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 import speechRecognition from '../services/speechRecognition';
+import { toast } from 'react-toastify';
 import '../styles/ExpenseForm.css';
 
 const ExpenseForm = ({ onExpenseAdded }) => {
@@ -33,7 +34,7 @@ const ExpenseForm = ({ onExpenseAdded }) => {
     e.preventDefault();
     
     if (!amount || !description) {
-      alert('Please fill in all fields');
+      toast.error('Please fill in all fields');
       return;
     }
 
@@ -61,11 +62,12 @@ const ExpenseForm = ({ onExpenseAdded }) => {
         onExpenseAdded();
       }
 
-      setSpeechStatus('Expense added successfully!');
-      setTimeout(() => setSpeechStatus(''), 3000);
+      toast.success('Expense added successfully!');
+      setSpeechStatus('');
       
     } catch (error) {
       console.error('Error adding expense:', error);
+      toast.error('Error adding expense');
       setSpeechStatus('Error adding expense');
     }
 
@@ -74,11 +76,13 @@ const ExpenseForm = ({ onExpenseAdded }) => {
 
   const startVoiceInput = () => {
     if (!speechRecognition.isSupported()) {
+      toast.warning('Speech recognition not supported in this browser');
       setSpeechStatus('Speech recognition not supported');
       return;
     }
 
     setIsListening(true);
+    toast.info('Listening... Speak now!');
     setSpeechStatus('Listening... Say something like "add 50 for groceries"');
 
     speechRecognition.startListening(
@@ -97,12 +101,18 @@ const ExpenseForm = ({ onExpenseAdded }) => {
           setCategory(expenseData.category);
         }
 
+        toast.success(`Recognized: "${transcript}"`);
         setSpeechStatus(`Heard: "${transcript}"`);
         setIsListening(false);
       },
       (error) => {
         console.error('Speech recognition error:', error);
+        toast.error(`Voice recognition error: ${error}`);
         setSpeechStatus(`Speech recognition error: ${error}`);
+        setIsListening(false);
+      }
+    );
+  };
         setIsListening(false);
       }
     );

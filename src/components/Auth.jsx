@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebase';
 import { FaGoogle, FaEye, FaEyeSlash, FaChartLine } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import '../styles/Auth.css';
 
 const Auth = () => {
@@ -21,11 +22,14 @@ const Auth = () => {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
+        toast.success('Welcome back!');
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
+        toast.success('Account created successfully!');
       }
     } catch (error) {
       setError(error.message);
+      toast.error(error.message);
     }
 
     setLoading(false);
@@ -37,8 +41,10 @@ const Auth = () => {
 
     try {
       await signInWithPopup(auth, googleProvider);
+      toast.success('Signed in with Google!');
     } catch (error) {
       setError(error.message);
+      toast.error(error.message);
     }
 
     setLoading(false);
