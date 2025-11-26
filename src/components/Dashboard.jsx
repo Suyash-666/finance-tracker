@@ -18,6 +18,7 @@ const Dashboard = ({ user }) => {
   const [expenses, setExpenses] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'cyber');
 
   // Budget state with loading indicator
   const [budget, setBudget] = useState(null);
@@ -247,8 +248,14 @@ const Dashboard = ({ user }) => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(getUserDisplayName())}&background=4f46e5&color=fff&size=40`;
   };
 
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className="dashboard-container">
+    <div className={`dashboard-container theme-${theme}`}>
       {/* Sidebar */}
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
@@ -258,6 +265,15 @@ const Dashboard = ({ user }) => {
           </button>
         </div>
         <nav className="sidebar-nav">
+          <div className="theme-selector">
+            <label>Theme</label>
+            <select value={theme} onChange={(e) => handleThemeChange(e.target.value)}>
+              <option value="cyber">Cyber Space</option>
+              <option value="classic">Classic</option>
+              <option value="aesthetic">Aesthetic</option>
+              <option value="medieval">Medieval</option>
+            </select>
+          </div>
           <button onClick={() => { setActiveTab('budget'); setSidebarOpen(false); }} className="sidebar-link">
             <FaChartLine /> Budget
           </button>

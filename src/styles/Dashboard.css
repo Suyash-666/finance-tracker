@@ -683,4 +683,128 @@
   .summary-item .value {
     font-size: 20px;
   }
-  }
+}
+
+/* Theme Selector */
+.theme-selector {
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+.theme-selector label {
+  display: block;
+  color: #00f0ff;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.theme-selector select {
+  width: 100%;
+  background: rgba(0, 20, 40, 0.5);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  color: #00f0ff;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-selector select:focus {
+  outline: none;
+  border-color: #00f0ff;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+/* Classic Theme */
+.theme-classic {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #333;
+}
+
+.theme-classic .dashboard-header {
+  background: #2c3e50;
+  border-bottom: 3px solid #34495e;
+}
+
+.theme-classic .logo-icon,
+.theme-classic .nav-btn,
+.theme-classic .sidebar-link {
+  color: #3498db;
+}
+
+.theme-classic .nav-btn:hover,
+.theme-classic .nav-btn.active {
+  background: #3498db;
+  color: white;
+}
+
+/* Aesthetic Theme */
+.theme-aesthetic {
+  background: linear-gradient(135deg, #ffeef8 0%, #e8d5f2 100%);
+}
+
+.theme-aesthetic .dashboard-header {
+  background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+  border-bottom: 3px solid #f67280;
+}
+
+.theme-aesthetic .logo-icon,
+.theme-aesthetic .nav-btn {
+  color: #fff0f6;
+}
+
+.theme-aesthetic .nav-btn:hover,
+.theme-aesthetic .nav-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.theme-aesthetic .sidebar {
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.95) 0%, rgba(192, 108, 132, 0.95) 100%);
+  border-right: 3px solid #f67280;
+}
+
+/* Medieval Theme */
+.theme-medieval {
+  background: linear-gradient(135deg, #2d1810 0%, #1a0f0a 100%);
+  background-image: 
+    radial-gradient(ellipse at top, rgba(139, 69, 19, 0.2) 0%, transparent 50%),
+    url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect fill="%23000" width="100" height="100"/><path d="M0 0L50 50L0 100M100 0L50 50L100 100" stroke="%23d4af37" stroke-width="0.5" opacity="0.1"/></svg>');
+}
+
+.theme-medieval .dashboard-header {
+  background: linear-gradient(135deg, rgba(101, 67, 33, 0.95) 0%, rgba(61, 43, 31, 0.95) 100%);
+  border-bottom: 3px solid #d4af37;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+}
+
+.theme-medieval .logo-icon,
+.theme-medieval .nav-btn {
+  color: #d4af37;
+  font-family: 'Georgia', serif;
+}
+
+.theme-medieval .nav-btn:hover,
+.theme-medieval .nav-btn.active {
+  background: rgba(212, 175, 55, 0.2);
+  border: 2px solid #d4af37;
+}
+
+.theme-medieval .sidebar {
+  background: linear-gradient(135deg, rgba(61, 43, 31, 0.98) 0%, rgba(101, 67, 33, 0.98) 100%);
+  border-right: 3px solid #d4af37;
+  box-shadow: 5px 0 30px rgba(212, 175, 55, 0.3);
+}
+
+.theme-medieval .sidebar-header h3,
+.theme-medieval .sidebar-link {
+  color: #d4af37;
+}
+
+.theme-medieval .sidebar-link:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: #d4af37;
+}
