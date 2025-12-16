@@ -1,0 +1,304 @@
+﻿/* src/styles/InvestmentTips.css - Cyber Space Theme */
+.investment-tips-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #000814 0%, #001d3d 50%, #000814 100%);
+  padding: 2rem;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.investment-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-subtitle {
+  text-align: center;
+  color: rgba(0, 240, 255, 0.8);
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+}
+
+.investments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.investment-card {
+  background: rgba(0, 8, 20, 0.85);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.investment-card:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 10px 40px rgba(0, 240, 255, 0.3);
+  transform: translateY(-5px);
+}
+
+.investment-card.selected {
+  border-color: #bd00ff;
+  box-shadow: 0 15px 50px rgba(189, 0, 255, 0.4);
+}
+
+.investment-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.investment-icon {
+  font-size: 2.5rem;
+  color: #00f0ff;
+  filter: drop-shadow(0 0 10px #00f0ff);
+}
+
+.investment-header h3 {
+  font-size: 1.5rem;
+  color: #00f0ff;
+  margin: 0;
+}
+
+.investment-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat {
+  background: rgba(0, 20, 40, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.stat label {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(0, 240, 255, 0.7);
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+  letter-spacing: 1px;
+}
+
+.stat p {
+  font-size: 1.2rem;
+  color: white;
+  margin: 0;
+  font-weight: bold;
+}
+
+.stat .return {
+  color: #00ff00;
+}
+
+.stat .risk {
+  font-size: 1rem;
+}
+
+.stat .risk.very-low {
+  color: #00ff00;
+}
+
+.stat .risk.low {
+  color: #7fff00;
+}
+
+.stat .risk.medium {
+  color: #ffd700;
+}
+
+.stat .risk.medium-high {
+  color: #ff8c00;
+}
+
+.stat .risk.high {
+  color: #ff4500;
+}
+
+.investment-details {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid rgba(0, 240, 255, 0.3);
+  animation: fadeIn 0.3s ease;
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.source-info {
+  background: rgba(0, 20, 40, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.source-info label {
+  display: block;
+  font-size: 0.9rem;
+  color: #00f0ff;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.source-info p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.earnings-projection {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(189, 0, 255, 0.1) 100%);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.earnings-projection h4 {
+  color: #00f0ff;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.earnings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.earning-item {
+  text-align: center;
+  background: rgba(0, 8, 20, 0.5);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.earning-item label {
+  display: block;
+  font-size: 0.9rem;
+  color: rgba(0, 240, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.earning-item p {
+  font-size: 1.5rem;
+  color: #00ff00;
+  margin: 0;
+  font-weight: bold;
+}
+
+.pros-cons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.pros h5,
+.cons h5 {
+  color: #00f0ff;
+  margin: 0 0 0.8rem 0;
+  font-size: 1.1rem;
+}
+
+.pros ul,
+.cons ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pros li {
+  color: #00ff00;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.cons li {
+  color: #ff6b6b;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.card-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.details-btn {
+  background: linear-gradient(135deg, #00f0ff 0%, #bd00ff 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 240, 255, 0.3);
+}
+
+.details-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5);
+}
+
+.disclaimer {
+  background: rgba(255, 107, 107, 0.1);
+  border: 2px solid rgba(255, 107, 107, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.disclaimer p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.disclaimer strong {
+  color: #ff6b6b;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .investments-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .investment-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .earnings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pros-cons {
+    grid-template-columns: 1fr;
+  }
+}

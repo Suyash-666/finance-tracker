@@ -1,0 +1,133 @@
+﻿/* src/styles/Feedback.css - Cyber Space Theme */
+.feedback-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #000814 0%, #001d3d 50%, #000814 100%);
+  padding: 2rem;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.feedback-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.page-subtitle {
+  text-align: center;
+  color: rgba(0, 240, 255, 0.8);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.feedback-form {
+  background: rgba(0, 8, 20, 0.85);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 40px rgba(0, 240, 255, 0.2);
+}
+
+.form-group {
+  margin-bottom: 2rem;
+}
+
+.form-group label {
+  display: block;
+  color: #00f0ff;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.star-rating {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.star {
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.star:hover {
+  transform: scale(1.2);
+}
+
+.star.filled {
+  color: #ffd700;
+  filter: drop-shadow(0 0 10px #ffd700);
+}
+
+.rating-text {
+  text-align: center;
+  color: #00f0ff;
+  font-size: 1.2rem;
+  margin: 0;
+  min-height: 1.5rem;
+}
+
+.feedback-select,
+.feedback-textarea {
+  width: 100%;
+  background: rgba(0, 20, 40, 0.5);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  color: white;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.feedback-select:focus,
+.feedback-textarea:focus {
+  outline: none;
+  border-color: #00f0ff;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+.feedback-textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #00f0ff 0%, #bd00ff 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(0, 240, 255, 0.3);
+}
+
+.submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 240, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .feedback-page {
+    padding: 1rem;
+  }
+
+  .feedback-form {
+    padding: 1.5rem;
+  }
+
+  .star-rating {
+    gap: 0.5rem;
+  }
+
+  .star {
+    font-size: 2rem;
+  }
+}

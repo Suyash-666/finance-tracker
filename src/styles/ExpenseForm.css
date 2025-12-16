@@ -1,0 +1,157 @@
+﻿/* ExpenseForm Component Styles - Cyber Space Theme */
+
+.expense-form-container {
+  background: linear-gradient(135deg, rgba(0, 8, 20, 0.95) 0%, rgba(10, 0, 30, 0.95) 100%);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 240, 255, 0.3);
+  border: 2px solid rgba(0, 240, 255, 0.5);
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  backdrop-filter: blur(10px);
+}
+
+.expense-form-container h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  color: #00f0ff;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.expense-form-container label {
+  display: block !important;
+  margin-bottom: 0.5rem;
+  color: #00f0ff !important;
+  font-weight: bold;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Orbitron', sans-serif;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+
+.expense-form-container input,
+.expense-form-container select {
+  width: 100%;
+  padding: 1rem 0.75rem;
+  background: rgba(0, 20, 40, 0.7);
+  border: 2px solid rgba(0, 240, 255, 0.5);
+  border-radius: 8px;
+  color: #00f0ff;
+  font-size: 1rem;
+  font-family: 'Orbitron', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.expense-form-container input:focus,
+.expense-form-container select:focus {
+  outline: none;
+  border-color: #00f0ff;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  background: rgba(0, 20, 40, 0.9);
+}
+
+.expense-form-container button[type="submit"] {
+  width: 100%;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #00f0ff 0%, #bd00ff 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 5px 20px rgba(0, 240, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.expense-form-container button[type="submit"]:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 240, 255, 0.6), 0 0 40px rgba(189, 0, 255, 0.4);
+}
+
+.expense-form-container button[type="submit"]:active {
+  transform: translateY(-1px);
+}
+
+.expense-form-container button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.voice-controls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.voice-button {
+  flex: 1;
+  padding: 1rem;
+  background: rgba(0, 240, 255, 0.1);
+  border: 2px solid #00f0ff;
+  border-radius: 8px;
+  color: #00f0ff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.voice-button:hover {
+  background: rgba(0, 240, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.voice-button.listening {
+  background: rgba(255, 0, 255, 0.2);
+  border-color: #ff00ff;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.speech-status {
+  text-align: center;
+  color: #00f0ff;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  min-height: 1.5rem;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 0, 255, 0.8);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .expense-form-container {
+    padding: 1.5rem;
+  }
+
+  .expense-form-container h3 {
+    font-size: 1.5rem;
+  }
+}

@@ -1,0 +1,131 @@
+﻿/* src/styles/Help.css - Cyber Space Theme */
+.help-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #000814 0%, #001d3d 50%, #000814 100%);
+  padding: 2rem;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.help-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.features-section,
+.faq-section,
+.contact-section {
+  background: rgba(0, 8, 20, 0.85);
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.features-section h3,
+.faq-section h3,
+.contact-section h3 {
+  color: #00f0ff;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.feature-item {
+  background: rgba(0, 20, 40, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  border-color: #00f0ff;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  color: #00f0ff;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 10px #00f0ff);
+}
+
+.feature-item h4 {
+  color: #00f0ff;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.feature-item p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.faq-item {
+  background: rgba(0, 20, 40, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 5px 20px rgba(0, 240, 255, 0.2);
+}
+
+.faq-item h4 {
+  color: #00f0ff;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.faq-item p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.contact-section {
+  text-align: center;
+}
+
+.contact-section p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.contact-section a {
+  color: #00f0ff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.contact-section a:hover {
+  text-shadow: 0 0 10px #00f0ff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .help-page {
+    padding: 1rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
