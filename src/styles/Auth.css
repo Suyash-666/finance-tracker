@@ -1,5 +1,7 @@
 ﻿/* Auth Component Styles - Cyber Space Theme */
-
+body{
+  color:white;
+}
 .auth-container {
   min-height: 100vh;
   display: flex;
